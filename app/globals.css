@@ -1,26 +1,82 @@
 @import "tailwindcss";
 
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --ink: #26251f;
+  --muted: #706c61;
+  --cream: #fbf8f0;
+  --paper: #fffdf8;
+  --yellow: #f2bd22;
+  --gold: #d99a0b;
+  --terracotta: #b95836;
+  --line: #e8e0cf;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--cream);
+  color: var(--ink);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.button-primary {
+  background: var(--ink);
+  color: white;
+}
+
+.button-primary:hover {
+  background: var(--terracotta);
+}
+
+.button-outline {
+  background: transparent;
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.button-text {
+  background: transparent;
+  color: var(--terracotta);
+  padding-left: 0;
+}
+
+.brand-mark {
+  background: var(--yellow);
+  color: var(--ink);
+}
+
+.announcement-link {
+  border-left: 1px solid #9e7810;
+}
+
+.nav-open {
+  position: absolute;
+  top: 70px;
+  right: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  background: var(--paper);
+  padding: 25px;
+  box-shadow: 0 14px 20px rgba(0, 0, 0, 0.08);
+}
+
+.hero-image {
+  transform: rotate(2.4deg);
+}
+
+.hero-image::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(
+    0deg,
+    rgba(28, 25, 17, 0.52),
+    transparent 45%
+  );
+}
+
+.featured-section {
+  background: var(--paper);
+  padding: 95px clamp(24px, 8vw, 128px);
 }
