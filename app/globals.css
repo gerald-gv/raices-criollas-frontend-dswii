@@ -80,3 +80,11 @@ body {
   background: var(--paper);
   padding: 95px clamp(24px, 8vw, 128px);
 }
+
+.dish-card {
+  transition: box-shadow 200ms ease;
+}
+
+.dish-card:hover {
+  box-shadow: 0 14px 30px rgba(38, 37, 31, 0.08);
+}
