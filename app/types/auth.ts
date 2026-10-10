@@ -20,3 +20,25 @@ export interface AuthState {
     errores?: Record<string, string>;
     valores?: Record<string, string>;
 }
+
+
+export interface Perfil {
+    id: number;
+    nombre: string;
+    apellido: string;
+    email: string;
+    telefono: string | null;
+    rol: string;
+    creadoEn: string;
+}
+
+export interface ActualizarPerfilInput {
+    nombre: string;
+    apellido: string;
+    telefono: string | null;
+}
+
+export interface CambiarPasswordInput {
+    passwordActual: string;
+    passwordNueva: string;
+}
