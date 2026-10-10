@@ -53,7 +53,7 @@ export const ReservationSection = () => {
                         </div>
                     </dl>
 
-                    <Link href="/reservas" className="inline-flex cursor-pointer items-center justify-center gap-2.5 rounded-sm border border-transparent px-5.25 py-3.5 text-xs font-extrabold tracking-[0.03em] transition-all duration-200 hover:-translate-y-0.5 button-primary">
+                    <Link href="/reservar-mesa" className="inline-flex cursor-pointer items-center justify-center gap-2.5 rounded-sm border border-transparent px-5.25 py-3.5 text-xs font-extrabold tracking-[0.03em] transition-all duration-200 hover:-translate-y-0.5 button-primary">
                         Reservar una mesa
                         <ArrowRight size={16} />
                     </Link>

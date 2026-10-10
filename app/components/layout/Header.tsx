@@ -2,7 +2,7 @@
 'use client'
 import { useState } from "react";
 import BrandMark from "../brand-mark";
-import { CalendarDays, ChevronDown, LogOut, Menu, Package, Settings, ShieldCheck, ShoppingBag, UserRound, UserRoundPlus, X } from "lucide-react";
+import { CalendarDays, ChevronDown, Menu, Package, Settings, ShieldCheck, ShoppingBag, UserRound, UserRoundPlus, X } from "lucide-react";
 import Link from "next/link";
 import { navigationLinks } from "@/app/data/Navigation";
 import { AccountLink } from "../AccountLink";

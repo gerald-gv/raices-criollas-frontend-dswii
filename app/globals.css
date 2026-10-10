@@ -140,3 +140,10 @@ body {
     animation: none;
   }
 }
+
+/* ===== Reservas y mesas ===== */
+.reserva-badge {
+  letter-spacing: 0.08em;
+  font-weight: 800;
+  text-transform: uppercase;
+}
