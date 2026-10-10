@@ -5,7 +5,7 @@ import { getMisReservas } from "../lib/cliente-reservas";
 import { ReservaCard } from "../components/reservas/ReservaCard";
 import { CalendarDays, Plus, Utensils } from "lucide-react";
 import Link from "next/link";
-import { ToastProvider } from "../components/admin/Toast";
+import { ToastProvider } from "../components/ui/Toast";
 
 export const metadata: Metadata = {
   title: "Mis Reservas | Raíces Criollas",
@@ -69,7 +69,7 @@ export default async function MisReservasPage({ searchParams }: MisReservasPageP
                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-(--terracotta)">
                   Mi historial
                 </p>
-                <h1 className="mt-2 font-serif text-[clamp(34px,4vw,52px)] font-normal leading-[0.98] tracking-[-0.05em] text-(--ink)">
+                <h1 className="mt-2 font-serif text-[clamp(34px,4vw,52px)] font-normal leading-[0.98] tracking-tighter text-(--ink)">
                   Mis <span className="text-(--terracotta) italic">reservas</span>
                 </h1>
                 <p className="mt-3 max-w-lg font-serif text-[15px] leading-[1.7] text-(--muted)">

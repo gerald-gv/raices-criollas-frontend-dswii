@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { getPerfil } from "../lib/perfil";
-import { ToastProvider } from "../components/admin/Toast";
+import { ToastProvider } from "../components/ui/Toast";
 import { PerfilResumen } from "../components/perfil/PerfilResumen";
 import { ProfileForm } from "../components/perfil/ProfileForm";
 import { PasswordForm } from "../components/perfil/PasswordForm";
@@ -38,7 +38,7 @@ export default async function CuentaPage() {
                             <PasswordForm />
                         </div>
                     </div>
-                    
+
                 </div>
 
             </section>

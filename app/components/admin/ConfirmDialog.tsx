@@ -3,7 +3,7 @@
 import { FormState } from "@/app/types/menu";
 import { ReactNode, useActionState, useEffect } from "react";
 import { Modal } from "../ui/Modal";
-import { useToast } from "./Toast";
+import { useToast } from "../ui/Toast";
 import { AlertCircle, AlertTriangle } from "lucide-react";
 import { Button } from "../ui/button";
 import { SubmitButton } from "../ui/SubmitButton";

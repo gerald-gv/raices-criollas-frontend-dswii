@@ -2,7 +2,7 @@
 
 import { actualizarPerfil } from "@/app/actions/perfil";
 import { useActionState, useEffect } from "react";
-import { useToast } from "../admin/Toast";
+import { useToast } from "../ui/Toast";
 import { FormState } from "@/app/types/menu";
 import { Perfil } from "@/app/types/auth";
 import { Field, inputClass } from "../ui/field";
@@ -65,7 +65,7 @@ export const ProfileForm = ({ perfil }: { perfil: Perfil }) => {
             <div className="flex justify-end">
                 <SubmitButton pendingText="Guardando…">Guardar cambios</SubmitButton>
             </div>
-            
+
         </form>
     );
 };

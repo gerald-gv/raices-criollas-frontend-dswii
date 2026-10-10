@@ -1,7 +1,7 @@
 "use client"
 
 import { useActionState, useEffect, useState } from "react";
-import { useToast } from "../admin/Toast";
+import { useToast } from "../ui/Toast";
 import { cambiarPassword } from "@/app/actions/perfil";
 import { FormState } from "@/app/types/menu";
 import { Field, inputClass } from "../ui/field";
@@ -67,7 +67,7 @@ export const PasswordForm = () => {
             <div className="flex justify-end">
                 <SubmitButton variant="outline" pendingText="Cambiando…">Cambiar contraseña</SubmitButton>
             </div>
-            
+
         </form>
     );
 };

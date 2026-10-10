@@ -3,7 +3,7 @@
 import { guardarCategoria } from "@/app/actions/menu";
 import { Categoria, FormState } from "@/app/types/menu";
 import { useActionState, useEffect } from "react";
-import { useToast } from "../Toast";
+import { useToast } from "../../ui/Toast";
 import { AlertCircle } from "lucide-react";
 import { Field, inputClass } from "../../ui/field";
 import { Button } from "../../ui/button";

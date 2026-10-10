@@ -5,7 +5,7 @@ import { ShieldAlert } from "lucide-react";
 import { AdminSidebar } from "../components/admin/AdminSideBar";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ToastProvider } from "../components/admin/Toast";
+import { ToastProvider } from "../components/ui/Toast";
 
 export const metadata: Metadata = {
     title: "Panel de administración | Raices Criollas",

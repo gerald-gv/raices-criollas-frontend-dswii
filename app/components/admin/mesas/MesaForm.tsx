@@ -5,7 +5,7 @@ import { FormState } from "@/app/types/menu";
 import { Mesa } from "@/app/types/reservas";
 import { AlertCircle } from "lucide-react";
 import { useActionState, useEffect } from "react";
-import { useToast } from "../Toast";
+import { useToast } from "../../ui/Toast";
 import { Field, inputClass } from "../../ui/field";
 import { Button } from "../../ui/button";
 import { SubmitButton } from "../../ui/SubmitButton";
