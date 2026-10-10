@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { CategoriaInput, FormState, PlatoInput } from "../types/menu";
 import { unstable_rethrow } from "next/navigation";
-import { createCategoria, createPlato, deleteCategoria, deletePlato, setCategoriaActiva, setPlatoDisponible, updateCategoria, updatePlato } from "../lib/admin-menu";
+import { createCategoria, createPlato, deleteCategoria, deletePlato, setCategoriaActiva, setPlatoDisponible, subirImagenPlato, updateCategoria, updatePlato } from "../lib/admin-menu";
 import { ApiError, getFieldErrors } from "../lib/api";
 
 
@@ -163,4 +163,24 @@ export async function eliminarPlato(_prev: FormState, formData: FormData): Promi
 
     refresh();
     return { ok: true, mensaje: "Plato eliminado" };
+}
+
+/**
+ * Server Action para subir una imagen desde el cliente.
+ * Recibe un FormData con el campo "archivo" (File),
+ * lo pasa al microservicio de menu y devuelve la URL de Cloudinary.
+ */
+export async function subirImagen(formData: FormData): Promise<{ url?: string; error?: string }> {
+    const archivo = formData.get("archivo");
+    if (!(archivo instanceof File) || archivo.size === 0) {
+        return { error: "No se recibió un archivo válido" };
+    }
+    try {
+        const url = await subirImagenPlato(archivo);
+        return { url };
+    } catch (error) {
+        unstable_rethrow(error);
+        if (error instanceof ApiError) return { error: error.message };
+        return { error: "No se pudo subir la imagen" };
+    }
 }

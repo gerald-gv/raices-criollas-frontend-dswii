@@ -1,6 +1,7 @@
 import { ApiResponse } from "../types/ApiResponse";
 
 const API_URL = process.env.API_URL ?? "http://localhost:8080";
+export { API_URL };
 
 export class ApiError extends Error {
     constructor(
