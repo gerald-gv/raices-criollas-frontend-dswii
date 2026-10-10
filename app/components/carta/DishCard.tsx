@@ -1,7 +1,6 @@
 import { formatPrice } from "@/app/lib/format";
 import { Plato } from "@/app/types/menu";
 import { UtensilsCrossed } from "lucide-react";
-import Image from "next/image";
 
 interface DishCardProps {
     plato: Plato;
@@ -13,7 +12,7 @@ export const DishCard = ({ plato }: DishCardProps) => {
 
             <div className="relative aspect-4/3 overflow-hidden bg-[#f2ebdc]">
                 {plato.imagen ? (
-                    <Image
+                    <img
                         src={plato.imagen}
                         alt={plato.nombre}
                         loading="lazy"
@@ -21,7 +20,7 @@ export const DishCard = ({ plato }: DishCardProps) => {
                     />
                 ) : (
                     <div className="flex size-full items-center justify-center text-(--terracotta)">
-                        <UtensilsCrossed size={34} strokeWidth={1.25} aria-hidden="true"/>
+                        <UtensilsCrossed size={34} strokeWidth={1.25} aria-hidden="true" />
                     </div>
                 )}
             </div>
