@@ -6,11 +6,11 @@ import { createContext, ReactNode, useCallback, useContext, useState } from "rea
 import { Modal } from "../../ui/Modal";
 import { PlatoForm } from "./PlatoForm";
 import { ConfirmDialog } from "../ConfirmDialog";
-import { Eye, EyeOff, Pencil, Plus, Trash2 } from "lucide-react";
-import { cambiarDisponibilidadPlato, eliminarPlato } from "@/app/actions/menu";
+import { Eye, EyeOff, Pencil, Plus, Star, Trash2 } from "lucide-react";
+import { cambiarDestacadoPlato, cambiarDisponibilidadPlato, eliminarPlato } from "@/app/actions/menu";
 import { Button } from "../../ui/button";
 
-export type PlatoModalState = { kind: "form" | "toggle" | "delete"; plato?: Plato } | null;
+export type PlatoModalState = { kind: "form" | "toggle" | "delete" | "destacar"; plato?: Plato } | null;
 
 const PlatoModalContext = createContext<((state: NonNullable<PlatoModalState>) => void) | null>(null);
 
@@ -89,6 +89,23 @@ export const PlatoModalProvider = ({ categorias, initial = null, children }: Pro
                 action={eliminarPlato}
                 fields={{ id: String(plato?.id ?? "") }}
             />
+
+            <ConfirmDialog
+                open={modal?.kind === "destacar"}
+                onClose={close}
+                title={plato?.destacado ? "Quitar de destacados" : "Marcar como destacado"}
+                icon={<Star size={20} />}
+                description={plato?.destacado
+                    ? <>Vas a quitar «{nombre}» de los platos destacados.</>
+                    : <>Vas a destacar «{nombre}» en la home.</>}
+                warning={plato?.destacado
+                    ? "Ya no aparecerá en la sección de favoritos de la página principal."
+                    : "Aparecerá en la sección «Los favoritos de Raíces». Recuerda que hay un máximo de 5 platos destacados."}
+                confirmLabel={plato?.destacado ? "Quitar destacado" : "Destacar"}
+                pendingText={plato?.destacado ? "Quitando…" : "Destacando…"}
+                action={cambiarDestacadoPlato}
+                fields={{ id: String(plato?.id ?? ""), destacar: String(!plato?.destacado) }}
+            />
         </PlatoModalContext.Provider>
     );
 };
@@ -109,6 +126,7 @@ const iconButton = "flex size-8 cursor-pointer items-center justify-center round
 export const PlatoRowButtons = ({ plato }: { plato: Plato }) => {
     const open = useOpenModal();
     const toggleLabel = plato.disponible ? `Ocultar ${plato.nombre} de la carta` : `Mostrar ${plato.nombre} en la carta`;
+    const destacarLabel = plato.destacado ? `Quitar ${plato.nombre} de destacados` : `Destacar ${plato.nombre}`;
 
     return (
         <div className="flex items-center justify-end gap-2">
@@ -118,6 +136,16 @@ export const PlatoRowButtons = ({ plato }: { plato: Plato }) => {
 
             <button type="button" onClick={() => open({ kind: "toggle", plato })} aria-label={toggleLabel} title={toggleLabel} className={iconButton}>
                 {plato.disponible ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
+            </button>
+
+            <button
+                type="button"
+                onClick={() => open({ kind: "destacar", plato })}
+                aria-label={destacarLabel}
+                title={destacarLabel}
+                className={`${iconButton} ${plato.destacado ? "border-(--terracotta) text-(--terracotta)" : ""}`}
+            >
+                <Star size={14} aria-hidden="true" fill={plato.destacado ? "currentColor" : "none"} />
             </button>
 
             <button type="button" onClick={() => open({ kind: "delete", plato })} aria-label={`Eliminar ${plato.nombre}`} title="Eliminar"

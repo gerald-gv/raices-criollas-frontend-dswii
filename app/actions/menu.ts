@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { CategoriaInput, FormState, PlatoInput } from "../types/menu";
 import { unstable_rethrow } from "next/navigation";
-import { createCategoria, createPlato, deleteCategoria, deletePlato, setCategoriaActiva, setPlatoDisponible, subirImagenPlato, updateCategoria, updatePlato } from "../lib/admin-menu";
+import { createCategoria, createPlato, deleteCategoria, deletePlato, setCategoriaActiva, setPlatoDestacado, setPlatoDisponible, subirImagenPlato, updateCategoria, updatePlato } from "../lib/admin-menu";
 import { ApiError, getFieldErrors } from "../lib/api";
 
 
@@ -92,6 +92,7 @@ function platoFromForm(formData: FormData): PlatoInput {
         descripcion: text(formData, "descripcion") || null,
         precio: Number(text(formData, "precio")),
         disponible: checked(formData, "disponible"),
+        destacado: checked(formData, "destacado"),
         imagen: text(formData, "imagen") || null,
         categoriaId: Number(text(formData, "categoriaId")),
     };
@@ -149,6 +150,21 @@ export async function cambiarDisponibilidadPlato(_prev: FormState, formData: For
 
     refresh();
     return { ok: true, mensaje: activar ? "Plato disponible en la carta" : "Plato oculto de la carta" };
+}
+
+export async function cambiarDestacadoPlato(_prev: FormState, formData: FormData): Promise<FormState> {
+    const id = idOf(formData);
+    const destacar = formData.get("destacar") === "true";
+    if (!id) return { mensaje: "Plato no válido." };
+
+    try {
+        await setPlatoDestacado(id, destacar);
+    } catch (error) {
+        return toState(error);
+    }
+
+    refresh();
+    return { ok: true, mensaje: destacar ? "Plato marcado como destacado" : "Plato quitado de destacados" };
 }
 
 export async function eliminarPlato(_prev: FormState, formData: FormData): Promise<FormState> {

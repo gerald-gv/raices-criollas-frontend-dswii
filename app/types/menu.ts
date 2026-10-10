@@ -11,6 +11,7 @@ export interface Plato {
   descripcion: string | null;
   precio: number;
   disponible: boolean;
+  destacado: boolean;
   imagen: string | null;
   categoriaId: number;
 }
@@ -27,6 +28,7 @@ export interface PlatoInput {
   descripcion: string | null;
   precio: number;
   disponible: boolean;
+  destacado: boolean;
   imagen: string | null;
   categoriaId: number;
 }

@@ -85,6 +85,8 @@ export const deletePlato = (id: number) => admin<null>(`/platos/${id}`, "DELETE"
 
 export const setPlatoDisponible = (id: number, disponible: boolean) => admin<null>(`/platos/${id}/${disponible ? "activar" : "desactivar"}`, "PUT");
 
+export const setPlatoDestacado = (id: number, destacado: boolean) => admin<null>(`/platos/${id}/${destacado ? "destacar" : "quitar-destacado"}`, "PUT");
+
 /**
  * Sube una imagen a Cloudinary a través del microservicio de menu.
  * Devuelve la URL segura o lanza ApiError si falla.
