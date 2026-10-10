@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getToken } from "./session";
 import { Categoria, CategoriaInput, Pagina, Plato, PlatoInput, ResumenMenu } from "../types/menu";
-import { ApiError, apiRequest } from "./api";
+import { API_URL, ApiError, apiRequest } from "./api";
 
 // Ruta del microservicio menu
 const MENU = "/api/menu";
@@ -84,3 +84,40 @@ export const updatePlato = (id: number, input: PlatoInput) => admin<Plato>(`/pla
 export const deletePlato = (id: number) => admin<null>(`/platos/${id}`, "DELETE");
 
 export const setPlatoDisponible = (id: number, disponible: boolean) => admin<null>(`/platos/${id}/${disponible ? "activar" : "desactivar"}`, "PUT");
+
+/**
+ * Sube una imagen a Cloudinary a través del microservicio de menu.
+ * Devuelve la URL segura o lanza ApiError si falla.
+ */
+export async function subirImagenPlato(archivo: File): Promise<string> {
+    const token = await getToken();
+    if (!token) redirect("/login?next=/admin");
+
+    const formData = new FormData();
+    formData.append("archivo", archivo);
+
+    let res: Response;
+    try {
+        res = await fetch(`${API_URL}${MENU}/platos/imagen`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+            // NO pongas Content-Type: el browser lo genera con el boundary correcto
+            body: formData,
+        });
+    } catch {
+        throw new ApiError("No se pudo conectar con el servidor", 503);
+    }
+
+    let body: { url?: string; error?: string } | null = null;
+    try {
+        body = await res.json();
+    } catch { /* noop */ }
+
+    if (!res.ok) {
+        throw new ApiError(body?.error ?? `Error ${res.status}`, res.status);
+    }
+
+    if (!body?.url) throw new ApiError("El servidor no devolvió la URL de la imagen", 500);
+
+    return body.url;
+}
