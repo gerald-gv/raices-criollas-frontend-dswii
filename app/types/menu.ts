@@ -33,6 +33,7 @@ export interface PlatoInput {
 
 // Estado devuelto por las Server Actions de los formularios del panel
 export interface FormState {
+  ok?: boolean;
   mensaje?: string;
   errores?: Record<string, string>;
   valores?: Record<string, string>;
@@ -65,11 +66,4 @@ export interface Pagina<T> {
   totalPages: number;
   page: number;
   size: number;
-}
-
-export interface FormState {
-  ok?: boolean;
-  mensaje?: string;
-  errores?: Record<string, string>;
-  valores?: Record<string, string>;
 }
