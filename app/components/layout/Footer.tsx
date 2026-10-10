@@ -8,7 +8,7 @@ export const Footer = () => {
     return (
         <footer className="bg-(--ink) px-[clamp(24px,8vw,128px)] pb-5 pt-14.5 text-[#f8f3e7]">
             <div>
-                <a className="flex items-center gap-2.5 uppercase leading-[0.85]" href="#inicio">
+                <a className="flex items-center gap-2.5 uppercase leading-[0.85]" href="/">
                     <BrandMark />
 
                     <div className="text-sm font-extrabold tracking-[0.08em] leading-[0.85]">
