@@ -26,3 +26,6 @@ export const getPlatosDisponibles = (filtros: PlatoFiltros = {}) => {
   
   return apiGet<Plato[]>(`${MENU}/platos/disponibles${query ? `?${query}` : ""}`);
 };
+
+/** Platos marcados como destacados (disponibles, categoría activa). Usado en la home. */
+export const getPlatosDestacados = () => apiGet<Plato[]>(`${MENU}/platos/destacados`, 60);

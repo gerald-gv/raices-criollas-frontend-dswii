@@ -76,6 +76,14 @@ export const PlatoForm = ({ categorias, plato, onClose }: PlatoFormProps) => {
                 </span>
             </label>
 
+            <label className="flex cursor-pointer items-start gap-3">
+                <input type="checkbox" name="destacado" defaultChecked={state.valores ? state.valores.destacado === "on" : (plato?.destacado ?? false)} className="mt-0.5 size-4 accent-(--terracotta)" />
+                <span>
+                    <span className="block text-[13px] font-bold">Destacado en la home</span>
+                    <span className="block text-[12px] text-(--muted)">Máximo 5 platos pueden estar destacados al mismo tiempo.</span>
+                </span>
+            </label>
+
             <div className="mt-1 flex items-center justify-end gap-3">
                 <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
                 <SubmitButton>{plato ? "Guardar cambios" : "Crear plato"}</SubmitButton>

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { UtensilsCrossed } from "lucide-react";
+import Image from "next/image";
 import { PageHeader } from "@/app/components/admin/PageHeader";
 import { Pagination } from "@/app/components/admin/Pagination";
 import { StatusBadge } from "@/app/components/admin/StatusBadge";
@@ -86,7 +87,7 @@ export default async function AdminPlatosPage({ searchParams }: PlatosPageProps)
                                             <div className="flex items-center gap-3.5">
                                                 <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden bg-[#f2ebdc] text-(--terracotta)">
                                                     {plato.imagen ? (
-                                                        <img src={plato.imagen} alt="" loading="lazy" className="size-full object-cover" />
+                                                        <Image src={plato.imagen} alt="" width={48} height={48} className="size-full object-cover" />
                                                     ) : (
                                                         <UtensilsCrossed size={18} strokeWidth={1.25} aria-hidden="true" />
                                                     )}
