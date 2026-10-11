@@ -235,3 +235,44 @@ body {
     opacity: 0;
   }
 }
+
+
+
+/* ===== DishCard: icono del botón "Añadir al pedido" (el resto del botón es Tailwind) ===== */
+.dish-card__cart svg {
+  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dish-card__cart:hover svg {
+  transform: rotate(-10deg) scale(1.15);
+}
+
+/* ===== Slider infinito de recomendados ===== */
+/* Nada de arrastrar las imágenes mientras se desliza (el texto se bloquea con select-none en el componente) */
+.featured-slider img {
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+/* Desplazamiento: --idx lo pone el componente y --pv (platos a la vista) las clases del track */
+.slider-track {
+  transform: translateX(calc(var(--idx, 0) * -100% / var(--pv)));
+  transition: transform 500ms cubic-bezier(0.22, 0.8, 0.24, 1);
+}
+
+/* Salto invisible de un clon a su plato real */
+.slider-track--instant {
+  transition: none;
+}
+
+/* Sin slider (pocos platos) */
+.slider-track--static {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slider-track,
+  .dish-card__cart svg {
+    transition: none;
+  }
+}
