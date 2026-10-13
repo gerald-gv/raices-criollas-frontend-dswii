@@ -1,4 +1,4 @@
-import { FiltroDisponibilidad, Mesa } from "../types/reservas";
+import { CotizacionRequestDTO, CotizacionResponseDTO, FiltroDisponibilidad, Mesa } from "../types/reservas";
 import { apiRequest } from "./api";
 
 const RESERVAS_PREFIX = "/api/reservas";
@@ -16,6 +16,18 @@ export async function getMesasDisponibles(filtro: FiltroDisponibilidad): Promise
 
   return apiRequest<Mesa[]>(`${RESERVAS_PREFIX}/mesas/disponibles?${params.toString()}`, {
     method: "GET",
+    revalidate: false,
+  });
+}
+
+/**
+ * Cotiza en tiempo real el costo exacto de una reserva según la mesa y comensales.
+ * Endpoint público sin autenticación requerida.
+ */
+export async function cotizarReserva(dto: CotizacionRequestDTO): Promise<CotizacionResponseDTO> {
+  return apiRequest<CotizacionResponseDTO>(`${RESERVAS_PREFIX}/reservas/cotizar`, {
+    method: "POST",
+    body: dto,
     revalidate: false,
   });
 }
@@ -75,4 +87,59 @@ export async function consultarMesasDisponibles(
           : "No pudimos consultar la disponibilidad de mesas en este momento.",
     };
   }
+}
+
+export interface ResultadoCotizacion {
+  cotizacion: CotizacionResponseDTO | null;
+  error: string | null;
+}
+
+/**
+ * Obtiene de forma segura la cotización de una reserva para una mesa y fecha/hora seleccionadas.
+ */
+export async function obtenerCotizacionSegura(
+  mesaId?: number,
+  fecha?: string,
+  horaInicio?: string,
+  horaFin?: string,
+  personas = 2
+): Promise<ResultadoCotizacion> {
+  if (!mesaId || !fecha || !horaInicio || !horaFin || personas < 1) {
+    return { cotizacion: null, error: null };
+  }
+
+  const inicioIso = `${fecha}T${horaInicio.length === 5 ? `${horaInicio}:00` : horaInicio}`;
+  const finIso = `${fecha}T${horaFin.length === 5 ? `${horaFin}:00` : horaFin}`;
+
+  try {
+    const cotizacion = await cotizarReserva({
+      mesaId,
+      fechaInicio: inicioIso,
+      fechaFin: finIso,
+      cantidadPersonas: personas,
+    });
+    return { cotizacion, error: null };
+  } catch (err) {
+    return {
+      cotizacion: null,
+      error:
+        err instanceof Error
+          ? err.message
+          : "No se pudo obtener la cotización para esta mesa en el horario seleccionado.",
+    };
+  }
+}
+
+/**
+ * Formatea un valor numérico a moneda peruana (PEN / Soles) con formato estándar.
+ */
+export function formatPrice(value?: number | null, moneda = "PEN"): string {
+  if (value === undefined || value === null || Number.isNaN(Number(value))) {
+    return "S/ 0.00";
+  }
+  return new Intl.NumberFormat("es-PE", {
+    style: "currency",
+    currency: moneda || "PEN",
+    minimumFractionDigits: 2,
+  }).format(value);
 }

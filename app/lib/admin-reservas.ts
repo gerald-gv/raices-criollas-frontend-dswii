@@ -32,20 +32,21 @@ async function adminReservasApi<T>(
 }
 
 /**
- * Listado general administrativo de reservas.
- * Permite filtrar en cliente o servidor según los parámetros provistos.
+ * Listado general administrativo de reservas con filtrado por estado, estadoPago, clienteId, mesa o fecha.
  */
 export async function listAdminReservas(filtros?: FiltrosAdminReservas): Promise<Reserva[]> {
   const reservas = await adminReservasApi<Reserva[]>("/reservas", "GET");
 
   if (!filtros) return reservas;
 
-  // Filtrado local seguro para garantizar consistencia sin inventar parámetros de query no soportados
   return reservas.filter((reserva) => {
     if (filtros.estado && filtros.estado !== "TODOS" && reserva.estado !== filtros.estado) {
       return false;
     }
-    if (filtros.clienteId && reserva.clienteId !== filtros.clienteId) {
+    if (filtros.estadoPago && filtros.estadoPago !== "TODOS" && reserva.estadoPago !== filtros.estadoPago) {
+      return false;
+    }
+    if (filtros.clienteId && String(reserva.clienteId) !== String(filtros.clienteId)) {
       return false;
     }
     if (filtros.mesaId && reserva.mesa?.id !== filtros.mesaId) {
@@ -66,7 +67,7 @@ export async function getAdminReserva(id: number): Promise<Reserva> {
 }
 
 /**
- * Actualiza el estado de una reserva (CONFIRMADA, CANCELADA, COMPLETADA, PENDIENTE).
+ * Actualiza el estado operativo y/o de pago de una reserva.
  */
 export async function actualizarEstadoReserva(
   id: number,
