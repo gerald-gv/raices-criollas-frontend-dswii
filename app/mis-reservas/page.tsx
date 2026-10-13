@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 type Param = string | string[] | undefined;
 
 interface MisReservasPageProps {
-  searchParams: Promise<{ estado?: Param }>;
+  searchParams: Promise<{ estado?: Param; pago?: Param }>;
 }
 
 const first = (value: Param) => (Array.isArray(value) ? value[0] : value);
@@ -29,16 +29,19 @@ export default async function MisReservasPage({ searchParams }: MisReservasPageP
 
   const params = await searchParams;
   const estadoFiltro = first(params.estado)?.toUpperCase();
+  const pagoFiltro = first(params.pago)?.toUpperCase();
 
   const reservas = await getMisReservas();
 
   // Separación cronológica
   const ahora = new Date();
 
-  // Filtrar si el usuario seleccionó un estado en las pestañas
-  const reservasFiltradas = estadoFiltro
-    ? reservas.filter((r) => r.estado === estadoFiltro)
-    : reservas;
+  // Filtrar si el usuario seleccionó un estado u opción de pago
+  const reservasFiltradas = reservas.filter((r) => {
+    if (estadoFiltro && r.estado !== estadoFiltro) return false;
+    if (pagoFiltro && r.estadoPago !== pagoFiltro) return false;
+    return true;
+  });
 
   const proximas = reservasFiltradas.filter((r) => {
     const inicio = new Date(r.fechaInicio);
@@ -49,6 +52,10 @@ export default async function MisReservasPage({ searchParams }: MisReservasPageP
     const inicio = new Date(r.fechaInicio);
     return inicio < ahora || r.estado === "CANCELADA" || r.estado === "COMPLETADA";
   });
+
+  const pendientesPagoCount = reservas.filter(
+    (r) => r.estadoPago === "PENDIENTE" && r.estado !== "CANCELADA"
+  ).length;
 
   const tabs = [
     { label: "Todas", value: undefined },
@@ -73,8 +80,8 @@ export default async function MisReservasPage({ searchParams }: MisReservasPageP
                   Mis <span className="text-(--terracotta) italic">reservas</span>
                 </h1>
                 <p className="mt-3 max-w-lg font-serif text-[15px] leading-[1.7] text-(--muted)">
-                  Historial de tus mesas reservadas en Raíces Criollas. Puedes revisar tus detalles
-                  o cancelar reservas próximas si tus planes cambiaron.
+                  Historial de tus mesas reservadas en Raíces Criollas. Revisa el estado de tu mesa,
+                  el desglose del costo o gestiona cancelaciones si tus planes cambiaron.
                 </p>
               </div>
 
@@ -86,6 +93,28 @@ export default async function MisReservasPage({ searchParams }: MisReservasPageP
                 Nueva reserva
               </Link>
             </div>
+
+            {/* Aviso si existen reservas pendientes de pago */}
+            {pendientesPagoCount > 0 && (
+              <div className="mt-6 rounded-sm border border-(--yellow) bg-[#fffdf0] p-4 text-[13px] text-(--ink)">
+                <div className="flex items-start gap-3">
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-(--yellow) font-bold text-white text-[12px]">
+                    !
+                  </span>
+                  <div>
+                    <h3 className="font-bold text-[#b45309]">
+                      Tienes {pendientesPagoCount}{" "}
+                      {pendientesPagoCount === 1 ? "reserva pendiente" : "reservas pendientes"} de pago
+                    </h3>
+                    <p className="mt-0.5 text-[12px] text-(--muted) leading-relaxed">
+                      El restaurante otorga una ventana de tolerancia de 15 minutos para concretar
+                      el pago mediante pasarela (Mercado Pago). Si no se recibe la confirmación en dicho
+                      plazo, la mesa se liberará automáticamente para otros comensales.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Pestañas de filtro por estado */}
             <div className="mt-8 flex gap-2 overflow-x-auto border-t border-(--line) pt-4">

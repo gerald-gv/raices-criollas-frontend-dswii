@@ -5,14 +5,13 @@ import { unstable_rethrow } from "next/navigation";
 import { cancelarMiReserva, crearReservaCliente } from "../lib/cliente-reservas";
 import { actualizarEstadoReserva } from "../lib/admin-reservas";
 import { ApiError, getFieldErrors } from "../lib/api";
-import { FormState } from "../types/menu";
-import { EstadoReserva, ReservaRequestDTO } from "../types/reservas";
+import { EstadoPago, EstadoReserva, Reserva, ReservaFormState, ReservaRequestDTO } from "../types/reservas";
 
 const text = (formData: FormData, key: string) => String(formData.get(key) ?? "").trim();
 const valuesOf = (formData: FormData) =>
   Object.fromEntries([...formData.entries()].filter(([, v]) => typeof v === "string")) as Record<string, string>;
 
-function toState(error: unknown): FormState {
+function toState(error: unknown): ReservaFormState {
   unstable_rethrow(error);
 
   const errores = getFieldErrors(error);
@@ -40,11 +39,12 @@ function refreshReservas() {
 }
 
 /**
- * Server Action para crear una reserva por el cliente autenticado.
- * IMPORTANTE: No se recibe ni envía clienteId ni userId en el DTO.
- * El backend extrae el sub del JWT.
+ * Server Action para registrar una reserva por el cliente autenticado.
+ * La reserva se crea en estado operativo PENDIENTE y estado de pago PENDIENTE.
+ * El backend calcula el montoTotal y fechaExpiracionPago con bloqueo pesimista.
+ * El frontend nunca envía precios, montos, clienteId ni userId.
  */
-export async function crearReservaAction(_prev: FormState, formData: FormData): Promise<FormState> {
+export async function crearReservaAction(_prev: ReservaFormState, formData: FormData): Promise<ReservaFormState> {
   const mesaId = Number(text(formData, "mesaId"));
   const fecha = text(formData, "fecha");
   const horaInicio = text(formData, "horaInicio");
@@ -120,8 +120,10 @@ export async function crearReservaAction(_prev: FormState, formData: FormData): 
     observaciones,
   };
 
+  let reservaCreada: Reserva;
+
   try {
-    await crearReservaCliente(dto);
+    reservaCreada = await crearReservaCliente(dto);
   } catch (error) {
     return {
       ...toState(error),
@@ -132,14 +134,15 @@ export async function crearReservaAction(_prev: FormState, formData: FormData): 
   refreshReservas();
   return {
     ok: true,
-    mensaje: "¡Tu reserva ha sido confirmada con éxito! Te esperamos.",
+    mensaje: "Tu solicitud de reserva ha sido registrada y está pendiente de pago.",
+    data: reservaCreada,
   };
 }
 
 /**
  * Server Action para que el cliente cancele su propia reserva.
  */
-export async function cancelarMiReservaAction(_prev: FormState, formData: FormData): Promise<FormState> {
+export async function cancelarMiReservaAction(_prev: ReservaFormState, formData: FormData): Promise<ReservaFormState> {
   const id = Number(formData.get("id"));
 
   if (!id) {
@@ -160,30 +163,40 @@ export async function cancelarMiReservaAction(_prev: FormState, formData: FormDa
 }
 
 /**
- * Server Action para que el administrador actualice el estado de una reserva.
+ * Server Action para que el administrador actualice el estado de una reserva y/o su pago.
  */
 export async function cambiarEstadoReservaAdminAction(
-  _prev: FormState,
+  _prev: ReservaFormState,
   formData: FormData
-): Promise<FormState> {
+): Promise<ReservaFormState> {
   const id = Number(formData.get("id"));
   const nuevoEstado = text(formData, "estado") as EstadoReserva;
-  const observaciones = text(formData, "observaciones") || null;
+  const nuevoEstadoPago = text(formData, "estadoPago") as EstadoPago;
+  const observaciones = text(formData, "observaciones") || undefined;
 
   if (!id) {
     return { mensaje: "Reserva no identificada." };
   }
 
   const estadosValidos: EstadoReserva[] = ["PENDIENTE", "CONFIRMADA", "CANCELADA", "COMPLETADA"];
-  if (!estadosValidos.includes(nuevoEstado)) {
-    return { mensaje: "El estado seleccionado no es válido." };
+  const estadosPagoValidos: EstadoPago[] = ["PENDIENTE", "PAGADO", "FALLIDO", "REEMBOLSADO"];
+
+  const dto: { estado?: EstadoReserva; estadoPago?: EstadoPago; observaciones?: string } = {};
+
+  if (nuevoEstado && estadosValidos.includes(nuevoEstado)) {
+    dto.estado = nuevoEstado;
+  }
+
+  if (nuevoEstadoPago && estadosPagoValidos.includes(nuevoEstadoPago)) {
+    dto.estadoPago = nuevoEstadoPago;
+  }
+
+  if (observaciones) {
+    dto.observaciones = observaciones;
   }
 
   try {
-    await actualizarEstadoReserva(id, {
-      estado: nuevoEstado,
-      observaciones,
-    });
+    await actualizarEstadoReserva(id, dto);
   } catch (error) {
     return toState(error);
   }
@@ -191,6 +204,6 @@ export async function cambiarEstadoReservaAdminAction(
   refreshReservas();
   return {
     ok: true,
-    mensaje: `Estado de reserva actualizado a ${nuevoEstado}.`,
+    mensaje: `Reserva #${id} actualizada exitosamente.`,
   };
 }

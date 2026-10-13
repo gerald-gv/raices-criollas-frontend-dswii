@@ -53,7 +53,7 @@ export const MesaForm = ({ mesa, onClose }: MesaFormProps) => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Field label="Número de mesa" htmlFor="mesa-numero" error={error("numeroMesa")}>
           <input
             id="mesa-numero"
@@ -80,6 +80,26 @@ export const MesaForm = ({ mesa, onClose }: MesaFormProps) => {
             defaultValue={value("capacidad", mesa?.capacidad ?? 4)}
             placeholder="Ej.: 4"
             aria-invalid={!!error("capacidad")}
+            className={inputClass}
+          />
+        </Field>
+
+        <Field
+          label="Tarifa base (S/)"
+          htmlFor="mesa-precioBase"
+          error={error("precioBase")}
+          hint="Costo base fijado por el restaurante (S/ 20.00)"
+        >
+          <input
+            id="mesa-precioBase"
+            name="precioBase"
+            type="number"
+            min={0}
+            max={999}
+            step="0.50"
+            defaultValue={value("precioBase", mesa?.precioBase ?? 20)}
+            placeholder="20.00"
+            aria-invalid={!!error("precioBase")}
             className={inputClass}
           />
         </Field>

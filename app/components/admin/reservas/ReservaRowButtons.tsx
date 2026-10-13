@@ -1,7 +1,7 @@
 "use client";
 
 import { Reserva } from "@/app/types/reservas";
-import { Check, CheckCircle2, Eye, XCircle } from "lucide-react";
+import { Check, CheckCircle2, CreditCard, Eye, XCircle } from "lucide-react";
 import { useOpenReservaModal } from "./ReservaModal";
 
 const iconButton =
@@ -22,6 +22,19 @@ export const ReservaRowButtons = ({ reserva }: { reserva: Reserva }) => {
       >
         <Eye size={14} aria-hidden="true" />
       </button>
+
+      {/* Registrar pago si está pendiente y no cancelada */}
+      {reserva.estadoPago === "PENDIENTE" && reserva.estado !== "CANCELADA" && (
+        <button
+          type="button"
+          onClick={() => open({ kind: "marcar-pagado", reserva })}
+          aria-label={`Registrar pago para reserva #${reserva.id}`}
+          title="Registrar pago recibido (PAGADO)"
+          className={`${iconButton} hover:border-[#009ee3]! hover:text-[#009ee3]!`}
+        >
+          <CreditCard size={14} aria-hidden="true" />
+        </button>
+      )}
 
       {/* Si está PENDIENTE: puede confirmar o cancelar */}
       {reserva.estado === "PENDIENTE" && (

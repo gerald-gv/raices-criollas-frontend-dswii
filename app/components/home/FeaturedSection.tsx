@@ -5,7 +5,7 @@ import { getPlatosDestacados } from "@/app/lib/menu"
 import { formatPrice } from "@/app/lib/format"
 
 export const FeaturedSection = async () => {
-    let platos = await getPlatosDestacados().catch(() => [])
+    const platos = await getPlatosDestacados().catch(() => [])
 
     return (
         <section className="featured-section">

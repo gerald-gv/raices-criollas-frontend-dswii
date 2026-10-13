@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { consultarMesasDisponibles } from "../lib/reservas";
+import { consultarMesasDisponibles, obtenerCotizacionSegura } from "../lib/reservas";
 import { getSession } from "../lib/session";
 import { ReservaSearch } from "../components/reservas/ReservaSearch";
 import { MesaCard } from "../components/reservas/MesaCard";
@@ -51,6 +51,11 @@ export default async function ReservarMesaPage({ searchParams }: ReservarMesaPag
   const selectedMesa = mesaIdParam
     ? mesasDisponibles.find((m) => m.id === mesaIdParam)
     : undefined;
+
+  // Si hay una mesa seleccionada y parámetros de fecha y horario, obtenemos la cotización real del backend
+  const { cotizacion, error: errorCotizacion } = selectedMesa
+    ? await obtenerCotizacionSegura(mesaIdParam, fecha, horaInicio, horaFin, personas)
+    : { cotizacion: null, error: null };
 
   // Objeto para transportar parámetros sin perder la búsqueda al seleccionar mesa
   const searchParamsObj: Record<string, string> = {};
@@ -107,7 +112,7 @@ export default async function ReservarMesaPage({ searchParams }: ReservarMesaPag
           </div>
         )}
 
-        {/* Sección de confirmación de mesa seleccionada */}
+        {/* Sección de confirmación de mesa seleccionada con cotización en tiempo real */}
         {selectedMesa && fecha && horaInicio && horaFin && (
           <div className="mb-12">
             <ReservaForm
@@ -116,6 +121,8 @@ export default async function ReservarMesaPage({ searchParams }: ReservarMesaPag
               horaInicio={horaInicio}
               horaFin={horaFin}
               personas={personas}
+              cotizacion={cotizacion}
+              errorCotizacion={errorCotizacion}
               isLoggedIn={isLoggedIn}
               loginRedirectUrl={loginRedirectUrl}
             />

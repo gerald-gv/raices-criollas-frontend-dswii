@@ -1,5 +1,6 @@
 import { Mesa } from "@/app/types/reservas";
-import { Check, Users, MapPin, Sparkles } from "lucide-react";
+import { formatPrice } from "@/app/lib/format";
+import { Check, Users, MapPin, Sparkles, Tag } from "lucide-react";
 import Link from "next/link";
 
 interface MesaCardProps {
@@ -13,6 +14,8 @@ export const MesaCard = ({ mesa, selected = false, searchParamsObj }: MesaCardPr
     ...searchParamsObj,
     mesaId: String(mesa.id),
   }).toString();
+
+  const tienePrecioBase = mesa.precioBase !== undefined && mesa.precioBase !== null;
 
   return (
     <article
@@ -48,11 +51,28 @@ export const MesaCard = ({ mesa, selected = false, searchParamsObj }: MesaCardPr
           </span>
         </div>
 
-        <div className="mt-4 flex items-center gap-2 border-t border-(--line)/70 pt-3 text-[13px] text-(--ink)">
-          <Users size={16} className="text-(--terracotta)" aria-hidden="true" />
-          <span>
-            Capacidad para <strong className="font-bold">{mesa.capacidad} {mesa.capacidad === 1 ? "persona" : "personas"}</strong>
-          </span>
+        <div className="mt-4 flex flex-col gap-1.5 border-t border-(--line)/70 pt-3 text-[13px] text-(--ink)">
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-2 text-(--muted)">
+              <Users size={16} className="text-(--terracotta)" aria-hidden="true" />
+              Capacidad máxima:
+            </span>
+            <strong className="font-bold text-(--ink)">
+              {mesa.capacidad} {mesa.capacidad === 1 ? "persona" : "personas"}
+            </strong>
+          </div>
+
+          {tienePrecioBase && (
+            <div className="flex items-center justify-between text-[12px]">
+              <span className="flex items-center gap-2 text-(--muted)">
+                <Tag size={14} className="text-(--terracotta)" aria-hidden="true" />
+                Tarifa base mesa:
+              </span>
+              <span className="font-bold text-(--terracotta)">
+                {formatPrice(mesa.precioBase!)}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
