@@ -2,6 +2,7 @@ import { formatPrice } from "@/app/lib/format";
 import { Plato } from "@/app/types/menu";
 import { ShoppingBag, Star, UtensilsCrossed } from "lucide-react";
 import Image from "next/image";
+import { AddToCartButton } from "../pedidos/AddToCartButton";
 
 interface DishCardProps {
     plato: Plato;
@@ -23,18 +24,6 @@ const DishImage = ({ plato, sizes }: { plato: Plato; sizes: string }) =>
             <UtensilsCrossed size={34} strokeWidth={1.25} aria-hidden="true" />
         </div>
     );
-
-// todavia no hay carrito. Cuando exista, basta con darle un onClick
-const CartButton = ({ plato, pill = false }: { plato: Plato; pill?: boolean }) => (
-    <button
-        type="button"
-        aria-label={`Añadir ${plato.nombre} al pedido`}
-        className={`dish-card__cart inline-flex cursor-pointer select-none items-center justify-center gap-2 border border-(--ink) bg-transparent text-[11px] font-extrabold uppercase tracking-[0.08em] text-(--ink) transition-colors duration-200 hover:border-(--terracotta) hover:bg-(--terracotta) hover:text-white active:translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--terracotta) ${pill ? "rounded-full px-6 py-3" : "w-full rounded-sm px-4 py-3.25"}`}
-    >
-        <ShoppingBag size={15} aria-hidden="true" />
-        Añadir al pedido
-    </button>
-);
 
 export const DishCard = ({ plato, variant = "default", className = "", sizes = DEFAULT_SIZES, badge }: DishCardProps) => {
 
@@ -71,7 +60,7 @@ export const DishCard = ({ plato, variant = "default", className = "", sizes = D
                     )}
 
                     <div className="mt-auto pt-2">
-                        <CartButton plato={plato} pill />
+                        <AddToCartButton platoId={plato.id} nombre={plato.nombre} pill />
                     </div>
                 </div>
             </article>
@@ -110,7 +99,7 @@ export const DishCard = ({ plato, variant = "default", className = "", sizes = D
                 )}
 
                 <div className="mt-auto pt-2">
-                    <CartButton plato={plato} />
+                    <AddToCartButton platoId={plato.id} nombre={plato.nombre} />
                 </div>
             </div>
 

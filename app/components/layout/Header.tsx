@@ -2,11 +2,12 @@
 'use client'
 import { useState } from "react";
 import BrandMark from "../brand-mark";
-import { CalendarDays, ChevronDown, Menu, Package, Settings, ShieldCheck, ShoppingBag, UserRound, UserRoundPlus, X } from "lucide-react";
+import { CalendarDays, ChevronDown, Menu, Package, Settings, ShieldCheck, UserRound, UserRoundPlus, X } from "lucide-react";
 import Link from "next/link";
 import { navigationLinks } from "@/app/data/Navigation";
 import { AccountLink } from "../AccountLink";
 import { LogoutButton } from "../ui/LogoutButton";
+import { CartLink } from "../pedidos/CartLink";
 
 type HeaderUser = {
     email: string;
@@ -196,13 +197,7 @@ export const Header = ({ user = null }: HeaderProps) => {
                     </div>
                 )}
                 
-                <button type="button" aria-label="Ver pedido, 0 productos" className="flex cursor-pointer items-center gap-1.75 border-0 bg-transparent p-2.5 text-(--ink)">
-                    <ShoppingBag size={19} />
-
-                    <span className=" flex size-4.5 items-center justify-center rounded-full bg-(--yellow) text-[10px] font-extrabold">
-                        0
-                    </span>
-                </button>
+                {!isAdmin && <CartLink loggedIn={!!user} />}
 
                 <Link href="/reservar-mesa" className="inline-flex cursor-pointer items-center justify-center gap-2.5 rounded-sm border border-transparent px-5.25 py-3.5 text-xs font-extrabold tracking-[0.03em] transition-all duration-200 hover:-translate-y-0.5 button-primary">
                     Reservar mesa

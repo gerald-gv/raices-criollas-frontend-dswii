@@ -28,13 +28,14 @@ interface RequestOptions {
     body?: unknown;
     token?: string;
     revalidate?: number | false;
+    headers?: Record<string, string>; // ej. Idempotency-Key del pago
 }
 
 // Todas las peticiones pasan por el gateway y devuelven solo el data de ApiResponse
-export async function apiRequest<T>(path: string, { method = "GET", body, token, revalidate = false }: RequestOptions = {}): Promise<T> {
+export async function apiRequest<T>(path: string, { method = "GET", body, token, revalidate = false, headers: extra }: RequestOptions = {}): Promise<T> {
 
 
-    const headers: Record<string, string> = { Accept: "application/json" };
+    const headers: Record<string, string> = { Accept: "application/json", ...extra };
 
     if (body !== undefined) headers["Content-Type"] = "application/json";
 

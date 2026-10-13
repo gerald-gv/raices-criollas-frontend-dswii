@@ -1,6 +1,6 @@
 "use client"
 
-import { CalendarCheck, Grid2X2, LayoutDashboard, Tags, Users, UtensilsCrossed } from "lucide-react";
+import { CalendarCheck, Grid2X2, LayoutDashboard, ShoppingBag, Tags, Users, UtensilsCrossed } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -11,6 +11,7 @@ const items = [
     { label: "Platos", href: "/admin/platos", icon: UtensilsCrossed },
     { label: "Categorías", href: "/admin/categorias", icon: Tags },
     { label: "Clientes", href: "/admin/clientes", icon: Users },
+    { label: "Pedidos", href: "/admin/pedidos", icon: ShoppingBag },
 ];
 
 export const AdminNav = () => {
