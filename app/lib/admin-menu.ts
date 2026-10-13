@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getToken } from "./session";
-import { Categoria, CategoriaInput, Pagina, Plato, PlatoInput, ResumenMenu } from "../types/menu";
+import { Categoria, CategoriaInput, Pagina, Plato, PlatoAdmin, PlatoInput, ResumenMenu } from "../types/menu";
 import { API_URL, ApiError, apiRequest } from "./api";
 
 // Ruta del microservicio menu
@@ -70,22 +70,27 @@ export const listPlatos = async ({ page = 0, size = 10, sort }: PlatosQuery = {}
     const params = new URLSearchParams({ page: String(page), size: String(size) });
     if (sort) params.set("sort", sort);
 
-    return normalizarPagina(await admin<PageCruda<Plato>>(`/platos?${params}`));
+    return normalizarPagina(await admin<PageCruda<PlatoAdmin>>(`/platos?${params}`));
 };
 
 export const getResumen = () => admin<ResumenMenu>("/platos/admin/resumen");
 
-export const getPlato = (id: number) => admin<Plato>(`/platos/admin/${id}`);
+export const getPlato = (id: number) => admin<PlatoAdmin>(`/platos/admin/${id}`);
 
-export const createPlato = (input: PlatoInput) => admin<Plato>("/platos", "POST", input);
+export const createPlato = (input: PlatoInput) => admin<PlatoAdmin>("/platos", "POST", input);
 
-export const updatePlato = (id: number, input: PlatoInput) => admin<Plato>(`/platos/${id}`, "PUT", input);
+export const updatePlato = (id: number, input: PlatoInput) => admin<PlatoAdmin>(`/platos/${id}`, "PUT", input);
 
 export const deletePlato = (id: number) => admin<null>(`/platos/${id}`, "DELETE");
 
 export const setPlatoDisponible = (id: number, disponible: boolean) => admin<null>(`/platos/${id}/${disponible ? "activar" : "desactivar"}`, "PUT");
 
 export const setPlatoDestacado = (id: number, destacado: boolean) => admin<null>(`/platos/${id}/${destacado ? "destacar" : "quitar-destacado"}`, "PUT");
+
+// Ajuste de stock, Menu responde 409 si no alcanza el stock y, al llegar a 0, oculta el plato solo
+export const reducirStockPlato = (id: number, cantidad: number) => admin<PlatoAdmin>(`/platos/${id}/reducir-stock?cantidad=${cantidad}`, "PUT");
+
+export const reponerStockPlato = (id: number, cantidad: number) => admin<PlatoAdmin>(`/platos/${id}/reponer-stock?cantidad=${cantidad}`, "PUT");
 
 /**
  * Sube una imagen a Cloudinary a través del microservicio de menu.

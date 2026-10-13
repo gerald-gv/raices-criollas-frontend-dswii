@@ -16,6 +16,10 @@ export interface Plato {
   categoriaId: number;
 }
 
+export interface PlatoAdmin extends Plato {
+  stock: number;
+}
+
 // CategoriaDTO / PlatoDTO del microservicio menu
 export interface CategoriaInput {
   nombre: string;
@@ -27,6 +31,7 @@ export interface PlatoInput {
   nombre: string;
   descripcion: string | null;
   precio: number;
+  stock: number;
   disponible: boolean;
   destacado: boolean;
   imagen: string | null;

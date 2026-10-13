@@ -1,6 +1,6 @@
 "use client"
 
-import { Categoria, Plato } from "@/app/types/menu";
+import { Categoria, PlatoAdmin } from "@/app/types/menu";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { createContext, ReactNode, useCallback, useContext, useState } from "react";
 import { Modal } from "../../ui/Modal";
@@ -10,7 +10,7 @@ import { Eye, EyeOff, Pencil, Plus, Star, Trash2 } from "lucide-react";
 import { cambiarDestacadoPlato, cambiarDisponibilidadPlato, eliminarPlato } from "@/app/actions/menu";
 import { Button } from "../../ui/button";
 
-export type PlatoModalState = { kind: "form" | "toggle" | "delete" | "destacar"; plato?: Plato } | null;
+export type PlatoModalState = { kind: "form" | "toggle" | "delete" | "destacar"; plato?: PlatoAdmin } | null;
 
 const PlatoModalContext = createContext<((state: NonNullable<PlatoModalState>) => void) | null>(null);
 
@@ -123,9 +123,12 @@ export const NuevoPlatoButton = () => {
 
 const iconButton = "flex size-8 cursor-pointer items-center justify-center rounded-sm border border-(--line) text-(--muted) transition-colors duration-200 hover:border-(--ink) hover:text-(--ink) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--terracotta)";
 
-export const PlatoRowButtons = ({ plato }: { plato: Plato }) => {
+export const PlatoRowButtons = ({ plato }: { plato: PlatoAdmin }) => {
     const open = useOpenModal();
     const toggleLabel = plato.disponible ? `Ocultar ${plato.nombre} de la carta` : `Mostrar ${plato.nombre} en la carta`;
+    // Menu no deja mostrar un plato agotado: se bloquea antes de preguntar
+    const sinStock = !plato.disponible && plato.stock === 0;
+    const sinStockMotivo = "Sin stock: repón unidades primero";
     const destacarLabel = plato.destacado ? `Quitar ${plato.nombre} de destacados` : `Destacar ${plato.nombre}`;
 
     return (
@@ -134,7 +137,10 @@ export const PlatoRowButtons = ({ plato }: { plato: Plato }) => {
                 <Pencil size={14} aria-hidden="true" />
             </button>
 
-            <button type="button" onClick={() => open({ kind: "toggle", plato })} aria-label={toggleLabel} title={toggleLabel} className={iconButton}>
+            <button type="button" onClick={() => open({ kind: "toggle", plato })} disabled={sinStock}
+                aria-label={sinStock ? `${toggleLabel} (no disponible: ${sinStockMotivo})` : toggleLabel}
+                title={sinStock ? sinStockMotivo : toggleLabel}
+                className={`${iconButton} disabled:cursor-not-allowed disabled:text-(--line) disabled:hover:border-(--line) disabled:hover:text-(--line)`}>
                 {plato.disponible ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
             </button>
 

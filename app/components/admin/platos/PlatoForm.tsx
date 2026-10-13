@@ -1,18 +1,19 @@
 "use client"
 
 import { guardarPlato } from "@/app/actions/menu";
-import { Categoria, FormState, Plato } from "@/app/types/menu";
-import { useActionState, useEffect } from "react";
+import { Categoria, FormState, PlatoAdmin } from "@/app/types/menu";
+import { useActionState, useEffect, useState } from "react";
 import { useToast } from "../../ui/Toast";
 import { AlertCircle } from "lucide-react";
 import { Field, inputClass } from "../../ui/field";
 import { ImageField } from "./ImageField";
 import { Button } from "../../ui/button";
 import { SubmitButton } from "../../ui/SubmitButton";
+import { StockChangeNotice } from "./StockChangeNotice";
 
 interface PlatoFormProps {
     categorias: Categoria[];
-    plato?: Plato;
+    plato?: PlatoAdmin;
     onClose: () => void;
 }
 
@@ -26,6 +27,20 @@ export const PlatoForm = ({ categorias, plato, onClose }: PlatoFormProps) => {
             onClose();
         }
     }, [state, notify, onClose]);
+
+    // Stock y disponibilidad van juntos: el aviso se calcula contra el stock guardado
+    const stockActual = plato?.stock ?? 0;
+    const [stockTxt, setStockTxt] = useState(() => state.valores ? (state.valores.stock ?? "") : String(stockActual));
+    const [disponible, setDisponible] = useState(() => state.valores ? state.valores.disponible === "on" : (plato?.disponible ?? true));
+    const stockNuevo = Number(stockTxt);
+    const stockValido = stockTxt !== "" && Number.isInteger(stockNuevo) && stockNuevo >= 0;
+
+    const onStockChange = (txt: string) => {
+        setStockTxt(txt);
+        const n = Number(txt);
+        // Repones un plato agotado: vuelve a la carta salvo que desmarques la casilla
+        if (plato && stockActual === 0 && txt !== "" && Number.isInteger(n) && n > 0) setDisponible(true);
+    };
 
     const error = (name: string) => state.errores?.[name];
     const value = (name: string, fallback: string) => state.valores ? (state.valores[name] ?? "") : fallback;
@@ -54,27 +69,36 @@ export const PlatoForm = ({ categorias, plato, onClose }: PlatoFormProps) => {
                     <input id="plato-precio" name="precio" type="number" required min="0.01" step="0.01" inputMode="decimal" defaultValue={value("precio", plato ? String(plato.precio) : "")} placeholder="0.00" aria-invalid={!!error("precio")} className={inputClass} />
                 </Field>
 
-                <Field label="Categoría" htmlFor="plato-categoria" error={error("categoriaId")}>
-                    <select id="plato-categoria" name="categoriaId" required defaultValue={value("categoriaId", plato ? String(plato.categoriaId) : "")} aria-invalid={!!error("categoriaId")} className={inputClass}>
-                        <option value="" disabled>Elige una categoría</option>
-                        {categorias.map((categoria) => (
-                            <option key={categoria.id} value={categoria.id}>
-                                {categoria.nombre}{categoria.activo ? "" : " (inactiva)"}
-                            </option>
-                        ))}
-                    </select>
+                <Field label="Stock (unidades)" htmlFor="plato-stock" error={error("stock")} hint={plato ? undefined : "Al llegar a 0 el plato se oculta solo."}>
+                    <input id="plato-stock" name="stock" type="number" required min="0" step="1" inputMode="numeric" value={stockTxt} onChange={(e) => onStockChange(e.target.value)} placeholder="0" aria-invalid={!!error("stock")} className={inputClass} />
                 </Field>
             </div>
 
+            {plato && stockValido && <StockChangeNotice actual={stockActual} nuevo={stockNuevo} />}
+
+            <Field label="Categoría" htmlFor="plato-categoria" error={error("categoriaId")}>
+                <select id="plato-categoria" name="categoriaId" required defaultValue={value("categoriaId", plato ? String(plato.categoriaId) : "")} aria-invalid={!!error("categoriaId")} className={inputClass}>
+                    <option value="" disabled>Elige una categoría</option>
+                    {categorias.map((categoria) => (
+                        <option key={categoria.id} value={categoria.id}>
+                            {categoria.nombre}{categoria.activo ? "" : " (inactiva)"}
+                        </option>
+                    ))}
+                </select>
+            </Field>
+
             <ImageField defaultUrl={value("imagen", plato?.imagen ?? "")} error={error("imagen")} />
 
-            <label className="flex cursor-pointer items-start gap-3">
-                <input type="checkbox" name="disponible" defaultChecked={state.valores ? state.valores.disponible === "on" : (plato?.disponible ?? true)} className="mt-0.5 size-4 accent-(--terracotta)" />
-                <span>
-                    <span className="block text-[13px] font-bold">Disponible en la carta</span>
-                    <span className="block text-[12px] text-(--muted)">Desmárcalo si hoy no se está sirviendo.</span>
-                </span>
-            </label>
+            {/* Al crear, Menu publica el plato si tiene stock; la casilla solo existe al editar */}
+            {plato && (
+                <label className="flex cursor-pointer items-start gap-3">
+                    <input type="checkbox" name="disponible" checked={stockValido && stockNuevo === 0 ? false : disponible} disabled={stockValido && stockNuevo === 0} onChange={(e) => setDisponible(e.target.checked)} className="mt-0.5 size-4 accent-(--terracotta)" />
+                    <span>
+                        <span className="block text-[13px] font-bold">Disponible en la carta</span>
+                        <span className="block text-[12px] text-(--muted)">Desmárcalo para ocultarlo. Con stock 0 se oculta solo.</span>
+                    </span>
+                </label>
+            )}
 
             <label className="flex cursor-pointer items-start gap-3">
                 <input type="checkbox" name="destacado" defaultChecked={state.valores ? state.valores.destacado === "on" : (plato?.destacado ?? false)} className="mt-0.5 size-4 accent-(--terracotta)" />

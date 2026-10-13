@@ -87,11 +87,14 @@ export async function eliminarCategoria(_prev: FormState, formData: FormData): P
 
 //  Platos 
 function platoFromForm(formData: FormData): PlatoInput {
+    const stock = text(formData, "stock");
+
     return {
         nombre: text(formData, "nombre"),
         descripcion: text(formData, "descripcion") || null,
         precio: Number(text(formData, "precio")),
-        disponible: checked(formData, "disponible"),
+        stock: stock === "" ? NaN : Number(stock),
+        disponible: idOf(formData) ? checked(formData, "disponible") : true,
         destacado: checked(formData, "destacado"),
         imagen: text(formData, "imagen") || null,
         categoriaId: Number(text(formData, "categoriaId")),
@@ -102,6 +105,7 @@ function platoFromForm(formData: FormData): PlatoInput {
 function platoErrors(input: PlatoInput): Record<string, string> | undefined {
     const errores: Record<string, string> = {};
     if (!Number.isFinite(input.precio) || input.precio <= 0) errores.precio = "Ingresa un precio mayor a 0";
+    if (!Number.isInteger(input.stock) || input.stock < 0) errores.stock = "Ingresa un stock entero de 0 o más";
     if (!input.categoriaId) errores.categoriaId = "Elige una categoría";
     return Object.keys(errores).length ? errores : undefined;
 }

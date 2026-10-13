@@ -8,6 +8,7 @@ import { getPlato, listCategorias, listPlatos } from "@/app/lib/admin-menu";
 import { formatPrice } from "@/app/lib/format";
 import { NuevoPlatoButton, PlatoModalProvider, PlatoModalState, PlatoRowButtons } from "@/app/components/admin/platos/PlatoModal";
 import { ApiError } from "@/app/lib/api";
+import { StockBadge } from "@/app/components/admin/platos/StockBadge";
 
 const PAGE_SIZE = 10;
 
@@ -66,13 +67,14 @@ export default async function AdminPlatosPage({ searchParams }: PlatosPageProps)
                 </div>
             ) : (
                 <div className="overflow-x-auto border border-(--line) bg-(--paper)">
-                    <table className="w-full min-w-170 text-left">
+                    <table className="w-full min-w-190 text-left">
                         <caption className="sr-only">Platos de la carta</caption>
                         <thead>
                             <tr className="border-b border-(--line) text-[10px] font-black uppercase tracking-[0.14em] text-(--muted)">
                                 <th scope="col" className="px-5 py-3.5">Plato</th>
                                 <th scope="col" className="px-3 py-3.5">Categoría</th>
                                 <th scope="col" className="px-3 py-3.5">Precio</th>
+                                <th scope="col" className="px-3 py-3.5">Stock</th>
                                 <th scope="col" className="px-3 py-3.5">Estado</th>
                                 <th scope="col" className="px-5 py-3.5 text-right">Acciones</th>
                             </tr>
@@ -109,6 +111,10 @@ export default async function AdminPlatosPage({ searchParams }: PlatosPageProps)
                                         </td>
 
                                         <td className="px-3 py-3.5 text-[13px] font-extrabold text-(--terracotta)">{formatPrice(plato.precio)}</td>
+
+                                        <td className="px-3 py-3.5">
+                                            <StockBadge stock={plato.stock} />
+                                        </td>
 
                                         <td className="px-3 py-3.5">
                                             <StatusBadge active={plato.disponible} activeLabel="Disponible" inactiveLabel="Oculto" />

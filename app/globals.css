@@ -276,3 +276,38 @@ body {
     transition: none;
   }
 }
+
+
+.stock-notice--agotado {
+  --stock-caja: border-color;
+  border-color: rgb(185 88 54 / 25%);
+  background: #f8e9e2;
+  --stock-icono: var(--terracotta);
+  --stock-pill-bg: #f3e0d7;
+  --stock-pill-color: var(--terracotta);
+}
+
+.stock-notice--aumenta {
+  border-color: rgb(91 107 47 / 25%);
+  background: #eef1e3;
+  --stock-icono: var(--olive);
+  --stock-pill-bg: #dfe6c9;
+  --stock-pill-color: var(--olive);
+}
+
+.stock-notice--disminuye {
+  border-color: rgb(217 154 11 / 35%);
+  background: #fef8e7;
+  --stock-icono: #9a6a05;
+  --stock-pill-bg: #fbeac0;
+  --stock-pill-color: #89600b;
+}
+
+.stock-noticeicon {
+  color: var(--stock-icono);
+}
+
+.stock-noticepill {
+  background: var(--stock-pill-bg);
+  color: var(--stock-pill-color);
+}
