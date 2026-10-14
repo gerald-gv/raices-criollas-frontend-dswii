@@ -28,6 +28,9 @@ export interface Perfil {
     apellido: string;
     email: string;
     telefono: string | null;
+    direccion: string | null;
+    distrito: string | null;
+    referencia: string | null;
     rol: string;
     creadoEn: string;
 }
@@ -36,6 +39,13 @@ export interface ActualizarPerfilInput {
     nombre: string;
     apellido: string;
     telefono: string | null;
+}
+
+export interface ActualizarDireccionInput {
+    direccion: string;
+    distrito: string;
+    referencia: string | null;
+    telefono: string;
 }
 
 export interface CambiarPasswordInput {

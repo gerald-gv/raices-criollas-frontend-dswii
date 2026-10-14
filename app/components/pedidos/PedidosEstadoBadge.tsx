@@ -5,7 +5,8 @@ const config: Record<EstadoPedido, { label: string; bg: string; text: string; do
     PAGADO: { label: "Pagado", bg: "bg-[#fef8e7]", text: "text-(--gold)", dot: "bg-(--gold)" },
     PREPARANDO: { label: "Preparando", bg: "bg-[#e4edf1]", text: "text-[#3b6a82]", dot: "bg-[#3b6a82]" },
     LISTO: { label: "Listo", bg: "bg-[#eef1e3]", text: "text-(--olive)", dot: "bg-(--olive)" },
-    ENTREGADO: { label: "Entregado", bg: "bg-[#eeebe5]", text: "text-(--ink)", dot: "bg-(--ink)" },
+    ENVIANDO: { label: "Enviando", bg: "bg-[#ece6f1]", text: "text-[#6b4f7d]", dot: "bg-[#6b4f7d]" },
+    ENTREGADO: { label: "Entregado", bg: "bg-[#e4efe8]", text: "text-[#2f6b4f]", dot: "bg-[#2f6b4f]" },
     CANCELADO: { label: "Cancelado", bg: "bg-[#f8e9e2]", text: "text-(--terracotta)", dot: "bg-(--terracotta)" },
 };
 

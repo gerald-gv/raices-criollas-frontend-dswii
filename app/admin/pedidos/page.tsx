@@ -25,6 +25,7 @@ const tabs: { label: string; value?: EstadoPedido }[] = [
     { label: "Pagados", value: "PAGADO" },
     { label: "Preparando", value: "PREPARANDO" },
     { label: "Listos", value: "LISTO" },
+    { label: "Enviando", value: "ENVIANDO" },
     { label: "Entregados", value: "ENTREGADO" },
     { label: "Cancelados", value: "CANCELADO" },
 ];

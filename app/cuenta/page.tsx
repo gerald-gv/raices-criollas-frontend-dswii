@@ -4,6 +4,7 @@ import { ToastProvider } from "../components/ui/Toast";
 import { PerfilResumen } from "../components/perfil/PerfilResumen";
 import { ProfileForm } from "../components/perfil/ProfileForm";
 import { PasswordForm } from "../components/perfil/PasswordForm";
+import { DireccionForm } from "../components/perfil/DireccionForm";
 
 export const metadata: Metadata = {
     title: "Mi perfil | Raices Criollas",
@@ -27,7 +28,7 @@ export default async function CuentaPage() {
                     </h1>
 
                     <p className="mt-4 max-w-xl font-serif text-base leading-[1.7] text-(--muted)">
-                        Revisa tus datos y mantenlos al día. Los usaremos para tus reservas.
+                        Revisa tus datos y mantenlos al día. Los usaremos para tus reservas y entregas.
                     </p>
 
                     <div className="mt-12 grid items-start gap-8 lg:grid-cols-[0.8fr_1.2fr]">
@@ -35,6 +36,7 @@ export default async function CuentaPage() {
 
                         <div className="flex flex-col gap-8">
                             <ProfileForm perfil={perfil} />
+                            <DireccionForm perfil={perfil} />
                             <PasswordForm />
                         </div>
                     </div>

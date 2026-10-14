@@ -1,7 +1,7 @@
 "use client"
 
 import { EstadoPedido, Pedido } from "@/app/types/pedidos";
-import { BellRing, ChefHat, PackageCheck, XCircle } from "lucide-react";
+import { BellRing, ChefHat, MapPin, PackageCheck, Phone, Truck, XCircle } from "lucide-react";
 import { createContext, ReactNode, useCallback, useContext, useState } from "react";
 import { Modal } from "../../ui/Modal";
 import { ConfirmDialog } from "../ConfirmDialog";
@@ -40,6 +40,13 @@ const accion: Record<EstadoPedido, { title: string; confirm: string; pending: st
         icon: <BellRing size={20} />,
         warning: "El pedido pasa a estar listo para entregarse al cliente.",
     },
+    ENVIANDO: {
+        title: "Enviar pedido",
+        confirm: "Marcar enviando",
+        pending: "Actualizando…",
+        icon: <Truck size={20} />,
+        warning: "El pedido sale hacia la dirección del cliente.",
+    },
     ENTREGADO: {
         title: "Marcar como entregado",
         confirm: "Marcar entregado",
@@ -52,7 +59,7 @@ const accion: Record<EstadoPedido, { title: string; confirm: string; pending: st
         confirm: "Cancelar pedido",
         pending: "Cancelando…",
         icon: <XCircle size={20} />,
-        warning: "El pedido queda cancelado de forma definitiva. Si ya estaba pagado, las unidades vuelven al stock del menú; el reembolso del cobro no se hace desde aquí.",
+        warning: "El pedido queda cancelado de forma definitiva.",
         danger: true,
     },
 };
@@ -82,6 +89,26 @@ export const PedidoModalProvider = ({ children }: { children: ReactNode }) => {
                         <p className="text-[12px] text-(--muted)">
                             Cliente: <span className="font-mono font-bold text-(--ink)">{pedido.clienteId}</span>
                         </p>
+
+                        <div className="border border-(--line) bg-(--cream) p-3.5 text-[13px] leading-relaxed">
+                            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-(--muted)">Entrega</p>
+                            {pedido.direccionEntrega ? (
+                                <>
+                                    <p className="mt-1.5 flex items-start gap-2 font-bold text-(--ink)">
+                                        <MapPin size={14} className="mt-0.5 shrink-0 text-(--terracotta)" aria-hidden="true" />
+                                        {pedido.direccionEntrega}
+                                    </p>
+                                    {pedido.telefonoContacto && (
+                                        <p className="mt-1 flex items-center gap-2 text-[12px] text-(--muted)">
+                                            <Phone size={13} className="shrink-0" aria-hidden="true" />
+                                            {pedido.telefonoContacto}
+                                        </p>
+                                    )}
+                                </>
+                            ) : (
+                                <p className="mt-1 text-[12px] text-(--muted)">Este pedido no tiene dirección registrada.</p>
+                            )}
+                        </div>
 
                         <ul className="divide-y divide-(--line) border-y border-(--line) text-[13px]">
                             {pedido.detalles.map((d) => (

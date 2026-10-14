@@ -3,7 +3,7 @@
 import { unstable_rethrow } from "next/navigation";
 import { FormState } from "../types/menu";
 import { ApiError, getFieldErrors } from "../lib/api";
-import { changePassword, updatePerfil } from "../lib/perfil";
+import { changePassword, updateDireccion, updatePerfil } from "../lib/perfil";
 import { revalidatePath } from "next/cache";
 
 const text = (formData: FormData, key: string) => String(formData.get(key) ?? "").trim();
@@ -39,6 +39,26 @@ export async function actualizarPerfil(_prev: FormState, formData: FormData): Pr
 
     revalidatePath("/cuenta");
     return { ok: true, mensaje: "Tus datos se actualizaron correctamente" };
+}
+
+// Direccion de entrega: se usa en el perfil y en el paso final de la compra
+export async function guardarDireccion(_prev: FormState, formData: FormData): Promise<FormState> {
+    const valores = {
+        direccion: text(formData, "direccion"),
+        distrito: text(formData, "distrito"),
+        referencia: text(formData, "referencia"),
+        telefono: text(formData, "telefono"),
+    };
+
+    try {
+        await updateDireccion({ ...valores, referencia: valores.referencia || null });
+    } catch (error) {
+        return { ...toState(error), valores };
+    }
+
+    revalidatePath("/cuenta");
+    revalidatePath("/carrito/continuar");
+    return { ok: true, mensaje: "Tu dirección de entrega quedó guardada" };
 }
 
 export async function cambiarPassword(_prev: FormState, formData: FormData): Promise<FormState> {

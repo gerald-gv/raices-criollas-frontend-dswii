@@ -1,7 +1,7 @@
 import { getToken } from "./session";
 import { ApiError, apiRequest } from "./api";
 import { redirect } from "next/navigation";
-import { ActualizarPerfilInput, CambiarPasswordInput, Perfil } from "../types/auth";
+import { ActualizarDireccionInput, ActualizarPerfilInput, CambiarPasswordInput, Perfil } from "../types/auth";
 
 const AUTH = "/api/auth/me";
 
@@ -24,5 +24,7 @@ async function perfilApi<T>(path: string, method: "GET" | "PUT" = "GET", body?: 
 export const getPerfil = () => perfilApi<Perfil>("");
 
 export const updatePerfil = (input: ActualizarPerfilInput) => perfilApi<Perfil>("", "PUT", input);
+
+export const updateDireccion = (input: ActualizarDireccionInput) => perfilApi<Perfil>("/direccion", "PUT", input);
 
 export const changePassword = (input: CambiarPasswordInput) => perfilApi<null>("/password", "PUT", input);

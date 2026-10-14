@@ -7,6 +7,7 @@ import { useActionState } from "react";
 import { AlertCircle } from "lucide-react";
 import { login, register } from "@/app/actions/auth";
 import Link from "next/link";
+import { NOMBRE_PATTERN, NOMBRE_TITLE, TELEFONO_PATTERN, TELEFONO_TITLE } from "@/app/lib/validaciones";
 
 interface AuthFormProps {
     mode: "login" | "register";
@@ -36,11 +37,11 @@ export const AuthForm = ({ mode, next }: AuthFormProps) => {
             {!isLogin && (
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <Field label="Nombre" htmlFor="nombre" error={error("nombre")}>
-                        <input id="nombre" name="nombre" required maxLength={100} autoComplete="given-name" defaultValue={value("nombre")} aria-invalid={!!error("nombre")} className={inputClass} />
+                        <input id="nombre" name="nombre" required maxLength={100} autoComplete="given-name" pattern={NOMBRE_PATTERN} title={NOMBRE_TITLE} defaultValue={value("nombre")} aria-invalid={!!error("nombre")} className={inputClass} />
                     </Field>
 
                     <Field label="Apellido" htmlFor="apellido" error={error("apellido")}>
-                        <input id="apellido" name="apellido" required maxLength={100} autoComplete="family-name" defaultValue={value("apellido")} aria-invalid={!!error("apellido")} className={inputClass} />
+                        <input id="apellido" name="apellido" required maxLength={100} autoComplete="family-name" pattern={NOMBRE_PATTERN} title={NOMBRE_TITLE} defaultValue={value("apellido")} aria-invalid={!!error("apellido")} className={inputClass} />
                     </Field>
                 </div>
             )}
@@ -51,7 +52,7 @@ export const AuthForm = ({ mode, next }: AuthFormProps) => {
 
             {!isLogin && (
                 <Field label="Teléfono (opcional)" htmlFor="telefono" error={error("telefono")}>
-                    <input id="telefono" name="telefono" type="tel" maxLength={20} autoComplete="tel" defaultValue={value("telefono")} aria-invalid={!!error("telefono")} className={inputClass} />
+                    <input id="telefono" name="telefono" type="tel" maxLength={20} inputMode="tel" autoComplete="tel" pattern={TELEFONO_PATTERN} title={TELEFONO_TITLE} placeholder="987 654 321" defaultValue={value("telefono")} aria-invalid={!!error("telefono")} className={inputClass} />
                 </Field>
             )}
 

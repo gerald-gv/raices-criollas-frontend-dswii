@@ -1,7 +1,7 @@
 "use client"
 
 import { EstadoPedido, Pedido, TRANSICIONES_PEDIDO } from "@/app/types/pedidos";
-import { BellRing, ChefHat, Eye, PackageCheck, XCircle } from "lucide-react";
+import { BellRing, ChefHat, Eye, PackageCheck, Truck, XCircle } from "lucide-react";
 import { ReactNode } from "react";
 import { useOpenPedidoModal } from "./PedidoModal";
 
@@ -12,6 +12,7 @@ const destinos: Record<EstadoPedido, { label: string; icon: ReactNode; hover: st
     PAGADO: undefined,
     PREPARANDO: { label: "Empezar a preparar", icon: <ChefHat size={14} aria-hidden="true" />, hover: "hover:border-(--gold)! hover:text-(--gold)!" },
     LISTO: { label: "Marcar como listo", icon: <BellRing size={14} aria-hidden="true" />, hover: "hover:border-(--olive)! hover:text-(--olive)!" },
+    ENVIANDO: { label: "Enviar pedido", icon: <Truck size={14} aria-hidden="true" />, hover: "hover:border-[#6b4f7d]! hover:text-[#6b4f7d]!" },
     ENTREGADO: { label: "Marcar como entregado", icon: <PackageCheck size={14} aria-hidden="true" />, hover: "hover:border-(--olive)! hover:text-(--olive)!" },
     CANCELADO: { label: "Cancelar pedido", icon: <XCircle size={14} aria-hidden="true" />, hover: "hover:border-(--terracotta)! hover:text-(--terracotta)!" },
 };

@@ -1,5 +1,5 @@
 import { Perfil } from "@/app/types/auth";
-import { CalendarDays, Mail, Phone } from "lucide-react";
+import { CalendarDays, Mail, MapPin, Phone } from "lucide-react";
 
 // Tarjeta de solo lectura
 export const PerfilResumen = ({ perfil }: { perfil: Perfil }) => {
@@ -31,6 +31,15 @@ export const PerfilResumen = ({ perfil }: { perfil: Perfil }) => {
                 <li className="flex items-center gap-3">
                     <Phone size={16} className="shrink-0 text-(--muted)" aria-hidden="true" />
                     {perfil.telefono ?? <span className="text-(--muted)">Sin teléfono registrado</span>}
+                </li>
+
+                <li className="flex items-start gap-3">
+                    <MapPin size={16} className="mt-0.5 shrink-0 text-(--muted)" aria-hidden="true" />
+                    {perfil.direccion ? (
+                        <span>{perfil.direccion}, {perfil.distrito}</span>
+                    ) : (
+                        <span className="text-(--muted)">Sin dirección de entrega</span>
+                    )}
                 </li>
 
                 {miembroDesde && (

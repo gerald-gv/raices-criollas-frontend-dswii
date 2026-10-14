@@ -1,12 +1,13 @@
-export type EstadoPedido = "PENDIENTE_PAGO" | "PAGADO" | "PREPARANDO" | "LISTO" | "ENTREGADO" | "CANCELADO";
+export type EstadoPedido = "PENDIENTE_PAGO" | "PAGADO" | "PREPARANDO" | "LISTO" | "ENVIANDO" | "ENTREGADO" | "CANCELADO";
 
-export const ESTADOS_PEDIDO: EstadoPedido[] = ["PENDIENTE_PAGO", "PAGADO", "PREPARANDO", "LISTO", "ENTREGADO", "CANCELADO"];
+export const ESTADOS_PEDIDO: EstadoPedido[] = ["PENDIENTE_PAGO", "PAGADO", "PREPARANDO", "LISTO","ENVIANDO", "ENTREGADO", "CANCELADO"];
 
 export const TRANSICIONES_PEDIDO: Record<EstadoPedido, EstadoPedido[]> = {
   PENDIENTE_PAGO: ["CANCELADO"],
-  PAGADO: ["PREPARANDO", "CANCELADO"],
-  PREPARANDO: ["LISTO", "CANCELADO"],
-  LISTO: ["ENTREGADO"],
+  PAGADO: ["PREPARANDO"],
+  PREPARANDO: ["LISTO"],
+  LISTO: ["ENVIANDO"],
+  ENVIANDO: ["ENTREGADO"],
   ENTREGADO: [],
   CANCELADO: [],
 };
@@ -47,6 +48,8 @@ export interface Pedido {
   fecha: string;
   estado: EstadoPedido;
   total: number;
+  direccionEntrega: string | null;
+  telefonoContacto: string | null;
   detalles: DetallePedido[];
 }
 
