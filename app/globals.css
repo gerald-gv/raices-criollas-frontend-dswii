@@ -13,6 +13,10 @@
   --olive: #5b6b2f;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--cream);
   color: var(--ink);
@@ -271,6 +275,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .slider-track,
   .dish-card__cart svg {
     transition: none;
@@ -310,4 +315,91 @@ body {
 .stock-noticepill {
   background: var(--stock-pill-bg);
   color: var(--stock-pill-color);
+}
+
+@keyframes rc-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes rc-float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes rc-steam {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scaleX(1);
+  }
+
+  40% {
+    opacity: 0.55;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-14px) scaleX(1.15);
+  }
+}
+
+.rc-fade-up {
+  opacity: 0;
+  animation: rc-fade-up 0.6s ease-out forwards;
+  animation-delay: var(--rc-delay, 0s);
+}
+
+.rc-float {
+  animation: rc-float 5s ease-in-out infinite;
+}
+
+.rc-steam {
+  opacity: 0;
+  animation: rc-steam 3.2s ease-in-out infinite;
+  animation-delay: var(--rc-delay, 0s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rc-fade-up {
+    opacity: 1;
+    animation: none;
+  }
+
+  .rc-float,
+  .rc-steam {
+    animation: none;
+  }
+}
+
+.rc-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+
+.rc-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rc-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
