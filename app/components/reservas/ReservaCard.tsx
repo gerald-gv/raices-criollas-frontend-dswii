@@ -2,10 +2,23 @@
 
 import { cancelarMiReservaAction } from "@/app/actions/reservas";
 import { Reserva } from "@/app/types/reservas";
-import { Calendar, Clock, MapPin, MessageSquare, Users, XCircle } from "lucide-react";
+import { formatPrice } from "@/app/lib/reservas";
+import {
+  Calendar,
+  Clock,
+  CreditCard,
+  Info,
+  MapPin,
+  MessageSquare,
+  ShieldCheck,
+  Users,
+  XCircle,
+} from "lucide-react";
 import { useState } from "react";
 import { ConfirmDialog } from "../admin/ConfirmDialog";
 import { ReservaEstadoBadge } from "./ReservaEstadoBadge";
+import { PagoEstadoBadge } from "./PagoEstadoBadge";
+import { ReservaCountdown } from "./ReservaCountdown";
 
 interface ReservaCardProps {
   reserva: Reserva;
@@ -36,6 +49,7 @@ export const ReservaCard = ({ reserva }: ReservaCardProps) => {
     : reserva.fechaFin.split("T")[1]?.slice(0, 5) ?? "";
 
   const puedeCancelar = reserva.estado === "PENDIENTE" || reserva.estado === "CONFIRMADA";
+  const esPagoPendiente = reserva.estadoPago === "PENDIENTE" && reserva.estado !== "CANCELADA";
 
   return (
     <article className="flex flex-col justify-between rounded-sm border border-(--line) bg-(--paper) p-6 transition-all duration-200 hover:border-(--ink)/30 hover:shadow-[0_8px_24px_rgba(38,37,31,0.06)]">
@@ -57,7 +71,10 @@ export const ReservaCard = ({ reserva }: ReservaCardProps) => {
             </div>
           </div>
 
-          <ReservaEstadoBadge estado={reserva.estado} />
+          <div className="flex flex-wrap items-center gap-1.5">
+            <ReservaEstadoBadge estado={reserva.estado} />
+            <PagoEstadoBadge estado={reserva.estadoPago} />
+          </div>
         </div>
 
         {/* Detalles principales */}
@@ -69,16 +86,64 @@ export const ReservaCard = ({ reserva }: ReservaCardProps) => {
 
           <div className="flex items-center gap-2 text-(--ink)">
             <Clock size={15} className="shrink-0 text-(--terracotta)" aria-hidden="true" />
-            <span className="font-medium">{horaInicioStr} – {horaFinStr}</span>
+            <span className="font-medium">
+              {horaInicioStr} – {horaFinStr}
+            </span>
           </div>
 
           <div className="flex items-center gap-2 text-(--ink)">
             <Users size={15} className="shrink-0 text-(--terracotta)" aria-hidden="true" />
             <span>
-              <strong className="font-bold">{reserva.cantidadPersonas}</strong> {reserva.cantidadPersonas === 1 ? "comensal" : "comensales"}
+              <strong className="font-bold">{reserva.cantidadPersonas}</strong>{" "}
+              {reserva.cantidadPersonas === 1 ? "comensal" : "comensales"}
+            </span>
+          </div>
+
+          {/* Importe total de la reserva */}
+          <div className="flex items-center gap-2 text-(--ink)">
+            <CreditCard size={15} className="shrink-0 text-(--terracotta)" aria-hidden="true" />
+            <span>
+              <span className="text-(--muted)">Total:</span>{" "}
+              <strong className="font-bold text-(--terracotta)">
+                {formatPrice(reserva.montoTotal, reserva.moneda)}
+              </strong>
             </span>
           </div>
         </dl>
+
+        {/* Notificación informativa según estado de pago */}
+        {esPagoPendiente && (
+          <div className="mt-4 rounded-sm border border-(--yellow) bg-[#fffdf0] p-3 text-[12px] text-(--ink)">
+            <div className="flex items-start gap-2">
+              <Info size={15} className="mt-0.5 shrink-0 text-[#b45309]" aria-hidden="true" />
+              <div className="space-y-1">
+                <p className="font-bold text-[#b45309]">
+                  Pendiente de pago — Tu reserva aún no está confirmada
+                </p>
+                <p className="text-(--muted) text-[11px] leading-relaxed">
+                  Cuentas con una tolerancia de 15 minutos para que la mesa permanezca apartada antes
+                  de liberarse automáticamente para otros clientes.
+                </p>
+                {reserva.fechaExpiracionPago && (
+                  <div className="pt-1">
+                    <ReservaCountdown fechaExpiracion={reserva.fechaExpiracionPago} />
+                  </div>
+                )}
+                <div className="flex items-center gap-1.5 pt-1 text-[11px] font-semibold text-(--muted)">
+                  <ShieldCheck size={13} className="text-[#009ee3]" aria-hidden="true" />
+                  <span>Preparado para pasarela de pago seguro (Mercado Pago)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {reserva.estadoPago === "PAGADO" && (
+          <div className="mt-4 flex items-center gap-2 rounded-sm border border-(--olive)/20 bg-(--olive)/5 p-2.5 text-[11px] text-(--olive)">
+            <ShieldCheck size={14} className="shrink-0" aria-hidden="true" />
+            <span>Pago verificado correctamente. Tu mesa está 100% asegurada.</span>
+          </div>
+        )}
 
         {/* Observaciones si las hay */}
         {reserva.observaciones && (
@@ -123,7 +188,9 @@ export const ReservaCard = ({ reserva }: ReservaCardProps) => {
         icon={<XCircle size={20} />}
         description={
           <>
-            ¿Deseas cancelar tu reserva para el <strong className="capitalize">{fechaFormateada}</strong> de {horaInicioStr} a {horaFinStr}?
+            ¿Deseas cancelar tu reserva para el{" "}
+            <strong className="capitalize">{fechaFormateada}</strong> de {horaInicioStr} a{" "}
+            {horaFinStr}?
           </>
         }
         warning="Al cancelar, la mesa quedará liberada para otros clientes. Esta acción no se puede deshacer."

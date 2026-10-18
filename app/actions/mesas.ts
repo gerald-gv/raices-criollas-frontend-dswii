@@ -27,7 +27,7 @@ function toState(error: unknown): FormState {
     if (error.status === 409) {
       return {
         mensaje: error.message || "Ya existe una mesa con ese número o hay un conflicto.",
-        errores: { numeroMesa: "El número de mesa ya está registrado" },
+        errores: { numeroMesa: "El número o código de mesa ya está registrado" },
       };
     }
     return { mensaje: error.message };
@@ -37,10 +37,14 @@ function toState(error: unknown): FormState {
 }
 
 function mesaFromForm(formData: FormData): MesaRequestDTO {
+  const precioBaseStr = text(formData, "precioBase");
+  const precioBase = precioBaseStr ? Number(precioBaseStr) : 20.0;
+
   return {
-    numeroMesa: Number(text(formData, "numeroMesa")),
+    numeroMesa: text(formData, "numeroMesa"),
     capacidad: Number(text(formData, "capacidad")),
     ubicacion: text(formData, "ubicacion"),
+    precioBase: Number.isFinite(precioBase) && precioBase >= 0 ? precioBase : 20.0,
     activo: checked(formData, "activo"),
   };
 }
@@ -48,8 +52,8 @@ function mesaFromForm(formData: FormData): MesaRequestDTO {
 function validarMesa(dto: MesaRequestDTO): Record<string, string> | undefined {
   const errores: Record<string, string> = {};
 
-  if (!Number.isInteger(dto.numeroMesa) || dto.numeroMesa <= 0) {
-    errores.numeroMesa = "Ingresa un número de mesa válido mayor a 0";
+  if (!dto.numeroMesa || String(dto.numeroMesa).trim().length === 0) {
+    errores.numeroMesa = "Ingresa un número o código de mesa (ej.: 12 o M-03)";
   }
 
   if (!Number.isInteger(dto.capacidad) || dto.capacidad <= 0) {
@@ -60,11 +64,15 @@ function validarMesa(dto: MesaRequestDTO): Record<string, string> | undefined {
     errores.ubicacion = "Indica la ubicación (ej.: Salón Principal, Terraza, Balcón)";
   }
 
+  if (dto.precioBase !== undefined && (!Number.isFinite(dto.precioBase) || dto.precioBase < 0)) {
+    errores.precioBase = "Ingresa una tarifa base mayor o igual a 0";
+  }
+
   return Object.keys(errores).length > 0 ? errores : undefined;
 }
 
 /**
- * Server Action para crear o editar una mesa.
+ * Server Action para crear o editar una mesa con soporte de tarifa base.
  */
 export async function guardarMesaAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const idStr = text(formData, "id");

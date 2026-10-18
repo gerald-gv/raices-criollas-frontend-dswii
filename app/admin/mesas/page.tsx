@@ -7,8 +7,9 @@ import {
   NuevaMesaButton,
 } from "@/app/components/admin/mesas/MesaModal";
 import { getAdminMesa, listAdminMesas } from "@/app/lib/admin-mesas";
+import { formatPrice } from "@/app/lib/reservas";
 import { ApiError } from "@/app/lib/api";
-import { Users, MapPin, Grid2X2 } from "lucide-react";
+import { Users, MapPin, Grid2X2, CreditCard } from "lucide-react";
 
 type Param = string | string[] | undefined;
 
@@ -23,7 +24,9 @@ export default async function AdminMesasPage({ searchParams }: MesasPageProps) {
   const mesas = await listAdminMesas();
 
   // Ordenamos por número de mesa
-  const mesasOrdenadas = [...mesas].sort((a, b) => a.numeroMesa - b.numeroMesa);
+  const mesasOrdenadas = [...mesas].sort(
+    (a, b) => Number(a.numeroMesa) - Number(b.numeroMesa)
+  );
 
   let initial: MesaModalState = null;
   const editarId = Number(first(params.editar)) || undefined;
@@ -100,6 +103,16 @@ export default async function AdminMesasPage({ searchParams }: MesasPageProps) {
                   </strong>
                 </div>
 
+                <div className="mt-1 flex items-center justify-between text-[13px]">
+                  <span className="flex items-center gap-1.5 text-(--muted)">
+                    <CreditCard size={14} className="text-(--terracotta)" />
+                    Tarifa base:
+                  </span>
+                  <strong className="font-bold text-(--terracotta)">
+                    {formatPrice(mesa.precioBase ?? 20)}
+                  </strong>
+                </div>
+
                 <div className="mt-4 border-t border-(--line) pt-3">
                   <MesaRowButtons mesa={mesa} />
                 </div>
@@ -109,7 +122,7 @@ export default async function AdminMesasPage({ searchParams }: MesasPageProps) {
 
           {/* Tabla para pantallas de escritorio */}
           <div className="hidden md:block overflow-x-auto border border-(--line) bg-(--paper)">
-            <table className="w-full min-w-150 text-left">
+            <table className="w-full min-w-160 text-left">
               <caption className="sr-only">Mesas del restaurante</caption>
               <thead>
                 <tr className="border-b border-(--line) text-[10px] font-black uppercase tracking-[0.14em] text-(--muted)">
@@ -121,6 +134,9 @@ export default async function AdminMesasPage({ searchParams }: MesasPageProps) {
                   </th>
                   <th scope="col" className="px-4 py-3.5">
                     Capacidad
+                  </th>
+                  <th scope="col" className="px-4 py-3.5">
+                    Tarifa Base
                   </th>
                   <th scope="col" className="px-4 py-3.5">
                     Estado
@@ -162,6 +178,10 @@ export default async function AdminMesasPage({ searchParams }: MesasPageProps) {
                         <Users size={14} className="text-(--muted)" aria-hidden="true" />
                         <span>{mesa.capacidad} pers.</span>
                       </div>
+                    </td>
+
+                    <td className="px-4 py-3.5 text-[13px] font-bold text-(--terracotta)">
+                      {formatPrice(mesa.precioBase ?? 20)}
                     </td>
 
                     <td className="px-4 py-3.5">

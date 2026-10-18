@@ -10,14 +10,15 @@ interface SubmitButtonProps {
     pendingText?: string;
     variant?: "primary" | "outline" | "danger";
     className?: string;
+    disabled?: boolean;
 }
 
 // Deshabilita el boton y muestra un spinner mientras la Server Action responde
-export const SubmitButton = ({ children, pendingText = "Guardando…", variant = "primary", className = "" }: SubmitButtonProps) => {
+export const SubmitButton = ({ children, pendingText = "Guardando…", variant = "primary", className = "", disabled = false }: SubmitButtonProps) => {
     const { pending } = useFormStatus();
 
     return (
-        <Button type="submit" variant={variant} disabled={pending} aria-busy={pending} className={`disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 ${className}`}>
+        <Button type="submit" variant={variant} disabled={disabled || pending} aria-busy={pending} className={`disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 ${className}`}>
             {pending ? (
                 <>
                     <Loader2 size={15} className="animate-spin" aria-hidden="true" />
