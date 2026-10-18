@@ -1,27 +1,30 @@
-"use client"
+"use client";
 
-import { consultarPagoAction } from "@/app/actions/pagos";
-import { EstadoPago } from "@/app/types/Pagos";
 import { ReactNode, useEffect, useState } from "react";
-import { cart } from "../pedidos/cartStore";
 import Link from "next/link";
 import { AlertCircle, CheckCircle2, Clock, Loader2, Undo2 } from "lucide-react";
+import { consultarPagoAction } from "@/app/actions/pagos";
+import { EstadoPago, TipoPago } from "@/app/types/pagos";
+import { cart } from "../pedidos/cartStore";
 
-
+// Mercado Pago avisa al sistema de pagos por su cuenta y puede tardar unos segundos: se consulta cada 3 s, hasta 1 minuto
 const CADA_MS = 3000;
 const MAX_INTENTOS = 20;
 
 interface PagoEstadoProps {
     pagoId: number | null;
-    pedidoId?: number;
+    tipoInicial?: TipoPago | null;
+    pedidoId?: number | null;
+    reservaId?: number | null;
     estadoInicial: EstadoPago | null;
 }
 
 const linkPrimary = "inline-flex items-center justify-center rounded-sm bg-(--ink) px-6 py-3.5 text-xs font-extrabold text-white transition-colors hover:bg-(--terracotta)";
 const linkSecondary = "inline-flex items-center justify-center rounded-sm border border-(--line) px-6 py-3.5 text-xs font-extrabold text-(--ink) transition-colors hover:border-(--ink)";
 
-export const PagoEstado = ({ pagoId, pedidoId, estadoInicial }: PagoEstadoProps) => {
+export const PagoEstado = ({ pagoId, tipoInicial = null, pedidoId, reservaId, estadoInicial }: PagoEstadoProps) => {
     const [estado, setEstado] = useState<EstadoPago | null>(estadoInicial);
+    const [tipo, setTipo] = useState<TipoPago | null>(tipoInicial);
     const [intentos, setIntentos] = useState(0);
 
     const esperando = pagoId !== null && (estado === null || estado === "PENDIENTE");
@@ -33,6 +36,7 @@ export const PagoEstado = ({ pagoId, pedidoId, estadoInicial }: PagoEstadoProps)
         const timer = setTimeout(async () => {
             const result = await consultarPagoAction(pagoId);
             if (result.estado) setEstado(result.estado);
+            if (result.tipo) setTipo(result.tipo);
             setIntentos((n) => n + 1);
         }, CADA_MS);
 
@@ -40,10 +44,16 @@ export const PagoEstado = ({ pagoId, pedidoId, estadoInicial }: PagoEstadoProps)
     }, [esperando, agotado, pagoId, intentos]);
 
     useEffect(() => {
-        if (estado === "APROBADO") cart.clear();
-    }, [estado]);
+        if (estado === "APROBADO" && tipo === "PEDIDO") cart.clear();
+    }, [estado, tipo]);
 
-    const pedido = pedidoId ? `Pedido #${pedidoId}` : "Tu pedido";
+    const esReserva = tipo === "RESERVA";
+    const pedido = esReserva
+        ? (reservaId ? `La reserva #${reservaId}` : "Tu reserva")
+        : (pedidoId ? `Pedido #${pedidoId}` : "Tu pedido");
+    const listaPropia = esReserva ? "/mis-reservas" : "/mis-pedidos";
+    const verMis = esReserva ? "Ver mis reservas" : "Ver mis pedidos";
+    const nombreLista = esReserva ? "Mis reservas" : "Mis pedidos";
 
     let icon: ReactNode;
     let tone = "bg-[#f3e6dd] text-(--terracotta)";
@@ -51,12 +61,17 @@ export const PagoEstado = ({ pagoId, pedidoId, estadoInicial }: PagoEstadoProps)
     let texto: string;
     let acciones: ReactNode = (
         <>
-            <Link href="/mis-pedidos" className={linkPrimary}>Ver mis pedidos</Link>
-            <Link href="/carta" className={linkSecondary}>Volver a la carta</Link>
+            <Link href={listaPropia} className={linkPrimary}>{verMis}</Link>
+            <Link href={esReserva ? "/" : "/carta"} className={linkSecondary}>{esReserva ? "Volver al inicio" : "Volver a la carta"}</Link>
         </>
     );
 
-    if (estado === "APROBADO") {
+    if (estado === "APROBADO" && esReserva) {
+        icon = <CheckCircle2 size={34} aria-hidden="true" />;
+        tone = "bg-[#eef1e3] text-(--olive)";
+        titulo = "¡Reserva confirmada!";
+        texto = `${pedido} quedó pagada y tu mesa está asegurada. Te esperamos en Raíces Criollas.`;
+    } else if (estado === "APROBADO") {
         icon = <CheckCircle2 size={34} aria-hidden="true" />;
         tone = "bg-[#eef1e3] text-(--olive)";
         titulo = "¡Pago aprobado!";
@@ -64,31 +79,35 @@ export const PagoEstado = ({ pagoId, pedidoId, estadoInicial }: PagoEstadoProps)
     } else if (estado === "RECHAZADO" || estado === "CANCELADO") {
         icon = <AlertCircle size={34} aria-hidden="true" />;
         titulo = "No se pudo completar el pago";
-        texto = `${pedido} sigue pendiente y no se te cobró. Puedes intentarlo de nuevo desde «Mis pedidos»; si no lo pagas, se cancela solo.`;
+        texto = esReserva
+            ? `${pedido} sigue pendiente y no se te cobró. Puedes intentarlo de nuevo desde «Mis reservas» mientras no venza el plazo; si no se paga, la mesa se libera sola.`
+            : `${pedido} sigue pendiente y no se te cobró. Puedes intentarlo de nuevo desde «Mis pedidos»; si no lo pagas, se cancela solo.`;
         acciones = (
             <>
-                <Link href="/mis-pedidos?estado=PENDIENTE_PAGO" className={linkPrimary}>Intentar de nuevo</Link>
-                <Link href="/carta" className={linkSecondary}>Volver a la carta</Link>
+                <Link href={esReserva ? "/mis-reservas?estado=PENDIENTE" : "/mis-pedidos?estado=PENDIENTE_PAGO"} className={linkPrimary}>Intentar de nuevo</Link>
+                <Link href={esReserva ? "/" : "/carta"} className={linkSecondary}>{esReserva ? "Volver al inicio" : "Volver a la carta"}</Link>
             </>
         );
     } else if (estado === "REEMBOLSADO") {
         icon = <Undo2 size={34} aria-hidden="true" />;
         tone = "bg-(--cream) text-(--muted)";
         titulo = "Pago reembolsado";
-        texto = `El cobro de ${pedido.toLowerCase()} fue devuelto por Mercado Pago.`;
+        texto = `El cobro de ${esReserva ? "la reserva" : pedido.toLowerCase()} fue devuelto por Mercado Pago.`;
     } else if (esperando && !agotado) {
         icon = <Loader2 size={34} className="animate-spin" aria-hidden="true" />;
         tone = "bg-[#fef8e7] text-(--gold)";
         titulo = "Confirmando tu pago…";
         texto = "Estamos esperando la confirmación de Mercado Pago. Suele tardar unos segundos; no cierres esta página.";
-        acciones = <Link href="/mis-pedidos" className={linkSecondary}>Ver mis pedidos</Link>;
+        acciones = <Link href={listaPropia} className={linkSecondary}>{verMis}</Link>;
     } else {
         icon = <Clock size={34} aria-hidden="true" />;
         tone = "bg-[#fef8e7] text-(--gold)";
         titulo = pagoId === null ? "No encontramos tu pago" : "Tu pago sigue en proceso";
         texto = pagoId === null
-            ? "Revisa «Mis pedidos»: ahí verás el estado de tu pedido."
-            : "Mercado Pago aún no confirma el pago. Cuando lo haga, tu pedido cambiará a «Pagado» en «Mis pedidos».";
+            ? "Revisa «Mis pedidos» o «Mis reservas»: ahí verás el estado de lo que pagaste."
+            : esReserva
+                ? "Mercado Pago aún no confirma el pago. Cuando lo haga, tu reserva pasará a «Confirmada» en «Mis reservas»."
+                : `Mercado Pago aún no confirma el pago. Cuando lo haga, tu pedido cambiará a «Pagado» en «${nombreLista}».`;
     }
 
     return (
