@@ -3,28 +3,20 @@
 import { cancelarMiReservaAction } from "@/app/actions/reservas";
 import { Reserva } from "@/app/types/reservas";
 import { formatPrice } from "@/app/lib/reservas";
-import {
-  Calendar,
-  Clock,
-  CreditCard,
-  Info,
-  MapPin,
-  MessageSquare,
-  ShieldCheck,
-  Users,
-  XCircle,
-} from "lucide-react";
+import { Calendar, Clock, CreditCard, Info, MapPin, MessageSquare, ShieldCheck, Users, XCircle } from "lucide-react";
 import { useState } from "react";
 import { ConfirmDialog } from "../admin/ConfirmDialog";
-import { ReservaEstadoBadge } from "./ReservaEstadoBadge";
-import { PagoEstadoBadge } from "./PagoEstadoBadge";
 import { ReservaCountdown } from "./ReservaCountdown";
+import { PagarReservaButton } from "./PagarReservaButton";
+import { PagoEstadoBadge } from "./PagoEstadoBadge";
+import { ReservaEstadoBadge } from "./ReservaEstadoBadge";
 
 interface ReservaCardProps {
   reserva: Reserva;
+  vencida?: boolean; // Lo calcula la página (servidor) para que servidor y navegador muestren lo mismo
 }
 
-export const ReservaCard = ({ reserva }: ReservaCardProps) => {
+export const ReservaCard = ({ reserva, vencida = false }: ReservaCardProps) => {
   const [openCancel, setOpenCancel] = useState(false);
 
   // Formato de fecha
@@ -33,11 +25,11 @@ export const ReservaCard = ({ reserva }: ReservaCardProps) => {
 
   const fechaFormateada = !Number.isNaN(inicioDate.getTime())
     ? inicioDate.toLocaleDateString("es-PE", {
-        weekday: "short",
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
     : reserva.fechaInicio;
 
   const horaInicioStr = !Number.isNaN(inicioDate.getTime())
@@ -48,8 +40,10 @@ export const ReservaCard = ({ reserva }: ReservaCardProps) => {
     ? finDate.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" })
     : reserva.fechaFin.split("T")[1]?.slice(0, 5) ?? "";
 
-  const puedeCancelar = reserva.estado === "PENDIENTE" || reserva.estado === "CONFIRMADA";
-  const esPagoPendiente = reserva.estadoPago === "PENDIENTE" && reserva.estado !== "CANCELADA";
+  const estaPagada = reserva.estadoPago === "PAGADO";
+  // Una reserva pagada no se cancela desde la web mientras el reembolso no esté listo (el dinero quedaría cobrado)
+  const puedeCancelar = (reserva.estado === "PENDIENTE" || reserva.estado === "CONFIRMADA") && !estaPagada && !vencida;
+  const esPagoPendiente = reserva.estadoPago === "PENDIENTE" && reserva.estado === "PENDIENTE" && !vencida;
 
   return (
     <article className="flex flex-col justify-between rounded-sm border border-(--line) bg-(--paper) p-6 transition-all duration-200 hover:border-(--ink)/30 hover:shadow-[0_8px_24px_rgba(38,37,31,0.06)]">
@@ -72,8 +66,8 @@ export const ReservaCard = ({ reserva }: ReservaCardProps) => {
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <ReservaEstadoBadge estado={reserva.estado} />
-            <PagoEstadoBadge estado={reserva.estadoPago} />
+            <ReservaEstadoBadge estado={reserva.estado} vencida={vencida} />
+            {!vencida && <PagoEstadoBadge estado={reserva.estadoPago} />}
           </div>
         </div>
 
@@ -129,19 +123,29 @@ export const ReservaCard = ({ reserva }: ReservaCardProps) => {
                     <ReservaCountdown fechaExpiracion={reserva.fechaExpiracionPago} />
                   </div>
                 )}
-                <div className="flex items-center gap-1.5 pt-1 text-[11px] font-semibold text-(--muted)">
-                  <ShieldCheck size={13} className="text-[#009ee3]" aria-hidden="true" />
-                  <span>Preparado para pasarela de pago seguro (Mercado Pago)</span>
+                <div className="flex items-center justify-between gap-3 pt-2">
+                  <span className="flex items-center gap-1.5 text-[11px] font-semibold text-(--muted)">
+                    <ShieldCheck size={13} className="text-[#009ee3]" aria-hidden="true" />
+                    Pago seguro con Mercado Pago
+                  </span>
+                  <PagarReservaButton reservaId={reserva.id} />
                 </div>
               </div>
             </div>
           </div>
         )}
 
+        {vencida && (
+          <div className="mt-4 rounded-sm border border-(--line) bg-(--cream) p-3 text-[12px] text-(--muted)">
+            Esta reserva expiró sin pago y la mesa fue liberada. Si aún quieres visitarnos, puedes hacer una nueva
+            reserva.
+          </div>
+        )}
+
         {reserva.estadoPago === "PAGADO" && (
           <div className="mt-4 flex items-center gap-2 rounded-sm border border-(--olive)/20 bg-(--olive)/5 p-2.5 text-[11px] text-(--olive)">
             <ShieldCheck size={14} className="shrink-0" aria-hidden="true" />
-            <span>Pago verificado correctamente. Tu mesa está 100% asegurada.</span>
+            <span>Pago confirmado. Tu mesa está asegurada.</span>
           </div>
         )}
 
@@ -173,8 +177,14 @@ export const ReservaCard = ({ reserva }: ReservaCardProps) => {
             Cancelar reserva
           </button>
         ) : (
-          <span className="text-[11px] italic text-(--muted)">
-            {reserva.estado === "CANCELADA" ? "Cancelada previamente" : "Visita completada"}
+          <span className="text-right text-[11px] italic text-(--muted)">
+            {reserva.estado === "CANCELADA"
+              ? "Cancelada previamente"
+              : vencida
+                ? "Expiró sin pago"
+                : reserva.estado === "COMPLETADA"
+                  ? "Visita completada"
+                  : "Para cambios o cancelación, comunícate con el restaurante"}
           </span>
         )}
       </div>

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "../lib/session";
 import { getMisReservas } from "../lib/cliente-reservas";
 import { ReservaCard } from "../components/reservas/ReservaCard";
+import { estaVencida } from "../lib/reservas-estados";
 import { CalendarDays, Plus, Utensils } from "lucide-react";
 import Link from "next/link";
 import { ToastProvider } from "../components/ui/Toast";
@@ -43,18 +44,20 @@ export default async function MisReservasPage({ searchParams }: MisReservasPageP
     return true;
   });
 
+  // Sin pagar y fuera de plazo: la mesa ya se liberó, así que pasa al historial como «Expirada»
+  const ahoraMs = ahora.getTime();
+  const vencidas = new Set(reservas.filter((r) => estaVencida(r, ahoraMs)).map((r) => r.id));
+
   const proximas = reservasFiltradas.filter((r) => {
     const inicio = new Date(r.fechaInicio);
-    return inicio >= ahora && (r.estado === "CONFIRMADA" || r.estado === "PENDIENTE");
+    return inicio >= ahora && !vencidas.has(r.id) && (r.estado === "CONFIRMADA" || r.estado === "PENDIENTE");
   });
 
-  const pasadasYCanceladas = reservasFiltradas.filter((r) => {
-    const inicio = new Date(r.fechaInicio);
-    return inicio < ahora || r.estado === "CANCELADA" || r.estado === "COMPLETADA";
-  });
+  const proximasIds = new Set(proximas.map((r) => r.id));
+  const pasadasYCanceladas = reservasFiltradas.filter((r) => !proximasIds.has(r.id));
 
   const pendientesPagoCount = reservas.filter(
-    (r) => r.estadoPago === "PENDIENTE" && r.estado !== "CANCELADA"
+    (r) => r.estadoPago === "PENDIENTE" && r.estado === "PENDIENTE" && !vencidas.has(r.id)
   ).length;
 
   const tabs = [
@@ -107,9 +110,8 @@ export default async function MisReservasPage({ searchParams }: MisReservasPageP
                       {pendientesPagoCount === 1 ? "reserva pendiente" : "reservas pendientes"} de pago
                     </h3>
                     <p className="mt-0.5 text-[12px] text-(--muted) leading-relaxed">
-                      El restaurante otorga una ventana de tolerancia de 15 minutos para concretar
-                      el pago mediante pasarela (Mercado Pago). Si no se recibe la confirmación en dicho
-                      plazo, la mesa se liberará automáticamente para otros comensales.
+                      Tu mesa queda apartada solo unos minutos. Paga con Mercado Pago desde cada
+                      reserva: si el pago no se confirma a tiempo, la mesa se libera para otros comensales.
                     </p>
                   </div>
                 </div>
@@ -180,7 +182,7 @@ export default async function MisReservasPage({ searchParams }: MisReservasPageP
 
                   <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                     {proximas.map((reserva) => (
-                      <ReservaCard key={reserva.id} reserva={reserva} />
+                      <ReservaCard key={reserva.id} reserva={reserva} vencida={vencidas.has(reserva.id)} />
                     ))}
                   </div>
                 </section>
@@ -203,7 +205,7 @@ export default async function MisReservasPage({ searchParams }: MisReservasPageP
 
                   <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                     {pasadasYCanceladas.map((reserva) => (
-                      <ReservaCard key={reserva.id} reserva={reserva} />
+                      <ReservaCard key={reserva.id} reserva={reserva} vencida={vencidas.has(reserva.id)} />
                     ))}
                   </div>
                 </section>
