@@ -1,11 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { unstable_rethrow } from "next/navigation";
-import { cancelarMiReserva, crearReservaCliente } from "../lib/cliente-reservas";
-import { actualizarEstadoReserva } from "../lib/admin-reservas";
+import { redirect, unstable_rethrow } from "next/navigation";
+import { cancelarMiReserva, crearReservaCliente, getMiReserva } from "../lib/cliente-reservas";
+import { actualizarEstadoReserva, getAdminReserva } from "../lib/admin-reservas";
 import { ApiError, getFieldErrors } from "../lib/api";
-import { EstadoPago, EstadoReserva, Reserva, ReservaFormState, ReservaRequestDTO } from "../types/reservas";
+import { crearPagoReserva } from "../lib/pagos";
+import { EstadoReserva, Reserva, ReservaFormState, ReservaRequestDTO } from "../types/reservas";
 
 const text = (formData: FormData, key: string) => String(formData.get(key) ?? "").trim();
 const valuesOf = (formData: FormData) =>
@@ -37,13 +38,14 @@ function refreshReservas() {
   revalidatePath("/admin/reservas");
   revalidatePath("/admin/clientes");
 }
-
 /**
- * Server Action para registrar una reserva por el cliente autenticado.
- * La reserva se crea en estado operativo PENDIENTE y estado de pago PENDIENTE.
- * El backend calcula el montoTotal y fechaExpiracionPago con bloqueo pesimista.
- * El frontend nunca envía precios, montos, clienteId ni userId.
+ * Server Action para reservar una mesa: crea la reserva (queda PENDIENTE, con plazo para pagar) y abre el pago
+ * en Mercado Pago. La reserva solo pasa a CONFIRMADA cuando el pago se aprueba.
+ * IMPORTANTE: No se recibe ni envía clienteId ni userId en el DTO. El backend extrae el sub del JWT.
  */
+
+const MENSAJE_PAGADA = "Esta reserva ya está pagada y por ahora los reembolsos no se hacen desde la web. Comunícate con el restaurante para cancelarla.";
+
 export async function crearReservaAction(_prev: ReservaFormState, formData: FormData): Promise<ReservaFormState> {
   const mesaId = Number(text(formData, "mesaId"));
   const fecha = text(formData, "fecha");
@@ -120,10 +122,10 @@ export async function crearReservaAction(_prev: ReservaFormState, formData: Form
     observaciones,
   };
 
-  let reservaCreada: Reserva;
+  let reserva: Reserva;
 
   try {
-    reservaCreada = await crearReservaCliente(dto);
+    reserva = await crearReservaCliente(dto);
   } catch (error) {
     return {
       ...toState(error),
@@ -132,10 +134,26 @@ export async function crearReservaAction(_prev: ReservaFormState, formData: Form
   }
 
   refreshReservas();
+
+  // La reserva ya existe, si Mercado Pago no se puede abrir ahora, queda en «Mis reservas» para pagarla desde ahi
+  let urlPago: string | null = null;
+
+  try {
+
+    const pago = await crearPagoReserva(reserva.id);
+    urlPago = pago.urlPago;
+
+  } catch (error) {
+    unstable_rethrow(error); // Un redirect a /login (sesion vencida) debe seguir su curso
+  }
+
+  if (urlPago) redirect(urlPago);
+
   return {
     ok: true,
-    mensaje: "Tu solicitud de reserva ha sido registrada y está pendiente de pago.",
-    data: reservaCreada,
+    data: reserva, // El formulario muestra la reserva pendiente con su botón «Pagar ahora»
+    mensaje:
+      "Tu reserva quedó registrada, pero no pudimos abrir Mercado Pago. Págala desde «Mis reservas» antes de que venza el plazo o la mesa se liberará.",
   };
 }
 
@@ -150,6 +168,9 @@ export async function cancelarMiReservaAction(_prev: ReservaFormState, formData:
   }
 
   try {
+    const reserva = await getMiReserva(id);
+    if (reserva.estadoPago === "PAGADO") return { mensaje: MENSAJE_PAGADA };
+
     await cancelarMiReserva(id);
   } catch (error) {
     return toState(error);
@@ -163,7 +184,7 @@ export async function cancelarMiReservaAction(_prev: ReservaFormState, formData:
 }
 
 /**
- * Server Action para que el administrador actualice el estado de una reserva y/o su pago.
+ * Server Action para que el administrador actualice el estado de una reserva.
  */
 export async function cambiarEstadoReservaAdminAction(
   _prev: ReservaFormState,
@@ -171,32 +192,29 @@ export async function cambiarEstadoReservaAdminAction(
 ): Promise<ReservaFormState> {
   const id = Number(formData.get("id"));
   const nuevoEstado = text(formData, "estado") as EstadoReserva;
-  const nuevoEstadoPago = text(formData, "estadoPago") as EstadoPago;
-  const observaciones = text(formData, "observaciones") || undefined;
+  const observaciones = text(formData, "observaciones") || null;
 
   if (!id) {
     return { mensaje: "Reserva no identificada." };
   }
 
-  const estadosValidos: EstadoReserva[] = ["PENDIENTE", "CONFIRMADA", "CANCELADA", "COMPLETADA"];
-  const estadosPagoValidos: EstadoPago[] = ["PENDIENTE", "PAGADO", "FALLIDO", "REEMBOLSADO"];
-
-  const dto: { estado?: EstadoReserva; estadoPago?: EstadoPago; observaciones?: string } = {};
-
-  if (nuevoEstado && estadosValidos.includes(nuevoEstado)) {
-    dto.estado = nuevoEstado;
-  }
-
-  if (nuevoEstadoPago && estadosPagoValidos.includes(nuevoEstadoPago)) {
-    dto.estadoPago = nuevoEstadoPago;
-  }
-
-  if (observaciones) {
-    dto.observaciones = observaciones;
+  // CONFIRMADA no se elige a mano: la reserva se confirma sola cuando Mercado Pago aprueba el pago
+  const estadosValidos: EstadoReserva[] = ["CANCELADA", "COMPLETADA"];
+  if (!estadosValidos.includes(nuevoEstado)) {
+    return { mensaje: "El estado seleccionado no es válido." };
   }
 
   try {
-    await actualizarEstadoReserva(id, dto);
+    if (nuevoEstado === "CANCELADA") {
+      const reserva = await getAdminReserva(id);
+      if (reserva.estadoPago === "PAGADO") return { mensaje: MENSAJE_PAGADA };
+    }
+
+    await actualizarEstadoReserva(id, {
+      estado: nuevoEstado,
+      observaciones,
+    });
+    
   } catch (error) {
     return toState(error);
   }
@@ -204,6 +222,6 @@ export async function cambiarEstadoReservaAdminAction(
   refreshReservas();
   return {
     ok: true,
-    mensaje: `Reserva #${id} actualizada exitosamente.`,
+    mensaje: `Estado de reserva actualizado a ${nuevoEstado}.`,
   };
 }

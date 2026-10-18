@@ -3,17 +3,7 @@
 import { crearReservaAction } from "@/app/actions/reservas";
 import { formatPrice } from "@/app/lib/format";
 import { CotizacionResponseDTO, Mesa, ReservaFormState } from "@/app/types/reservas";
-import {
-  AlertCircle,
-  AlertTriangle,
-  Calendar,
-  Clock,
-  Coins,
-  FileText,
-  MapPin,
-  Sparkles,
-  Users,
-} from "lucide-react";
+import { AlertCircle, AlertTriangle, Calendar, Clock, Coins, FileText, MapPin, Sparkles, Users } from "lucide-react";
 import Link from "next/link";
 import { useActionState } from "react";
 import { Field, inputClass } from "../ui/field";
@@ -21,7 +11,7 @@ import { SubmitButton } from "../ui/SubmitButton";
 import { ReservaEstadoBadge } from "./ReservaEstadoBadge";
 import { PagoEstadoBadge } from "./PagoEstadoBadge";
 import { ReservaCountdown } from "./ReservaCountdown";
-import { MercadoPagoNotice } from "./MercadoPagoNotice";
+import { PagarReservaButton } from "./PagarReservaButton";
 
 interface ReservaFormProps {
   mesa: Mesa;
@@ -71,7 +61,7 @@ export const ReservaForm = ({
             </div>
 
             <h3 className="mt-3 font-serif text-[clamp(26px,3.5vw,36px)] font-normal text-(--ink)">
-              Solicitud de reserva registrada
+              Reserva registrada: falta el pago
             </h3>
             <p className="mt-1 text-[13px] text-(--muted)">
               Código de solicitud:{" "}
@@ -101,9 +91,9 @@ export const ReservaForm = ({
           <div>
             <strong className="block font-bold">Reserva no confirmada aún</strong>
             <span>
-              Tu solicitud de reserva ha sido registrada. El pago en línea estará disponible
-              próximamente. Tu reserva todavía no está confirmada hasta que se registre el abono
-              correspondiente.
+              Tu reserva quedó registrada, pero no pudimos abrir Mercado Pago en este momento. Puedes
+              reintentar ahora o pagarla después desde «Mis reservas». Se confirma cuando el pago se
+              aprueba y, si no se paga a tiempo, la mesa se libera sola.
             </span>
           </div>
         </div>
@@ -142,12 +132,10 @@ export const ReservaForm = ({
           </dl>
         </div>
 
-        {/* Sección preparada para Mercado Pago */}
-        <div className="mb-8">
-          <MercadoPagoNotice
-            montoTotal={reservaCreada.montoTotal}
-            reservaId={reservaCreada.id}
-          />
+        {/* Reintento del pago (misma reserva = mismo cobro, no se duplica) */}
+        <div className="mb-8 flex flex-col items-end gap-2 rounded-sm border border-(--line) bg-(--cream) p-5">
+          <p className="w-full text-[12px] text-(--muted)">Pago seguro con Mercado Pago · tarjetas, débito y más.</p>
+          <PagarReservaButton reservaId={reservaCreada.id} />
         </div>
 
         {/* Botones de navegación */}
@@ -389,16 +377,16 @@ export const ReservaForm = ({
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-(--line) pt-5">
             <p className="text-[12px] text-(--muted) max-w-sm">
-              Tu reserva quedará registrada como pendiente de pago por 15 minutos mientras se habilita la pasarela de pago.
+              Al continuar te llevamos a Mercado Pago. La mesa queda apartada unos minutos mientras pagas y la reserva se confirma cuando el pago se aprueba.
             </p>
 
             <SubmitButton
               variant="primary"
-              pendingText="Registrando reserva…"
+              pendingText="Abriendo Mercado Pago…"
               className="w-full sm:w-auto"
               disabled={noDisponibleParaCotizar || !cotizacion}
             >
-              Continuar con mi reserva
+              Continuar al pago
             </SubmitButton>
           </div>
         </form>

@@ -78,7 +78,7 @@ export default async function ReservarMesaPage({ searchParams }: ReservarMesaPag
             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-(--terracotta)">
               Atención personalizada
             </p>
-            <h1 className="font-serif text-[clamp(36px,5vw,60px)] font-normal leading-[0.98] tracking-[-0.05em] text-(--ink)">
+            <h1 className="font-serif text-[clamp(36px,5vw,60px)] font-normal leading-[0.98] tracking-tighter text-(--ink)">
               Reserva tu <span className="text-(--terracotta) italic">mesa</span>
             </h1>
             <p className="max-w-xl font-serif text-base leading-[1.7] text-(--muted)">
@@ -199,7 +199,7 @@ export default async function ReservarMesaPage({ searchParams }: ReservarMesaPag
                 <Clock size={14} className="text-(--terracotta)" /> Reservas disponibles todos los días
               </span>
               <span className="flex items-center gap-1.5">
-                <Sparkles size={14} className="text-(--terracotta)" /> Confirmación al instante
+                <Sparkles size={14} className="text-(--terracotta)" /> Confirmación al pagar
               </span>
             </div>
           </div>
