@@ -2,6 +2,7 @@ import { EstadoReserva } from "@/app/types/reservas";
 
 interface ReservaEstadoBadgeProps {
   estado: EstadoReserva;
+  vencida?: boolean;
   className?: string;
 }
 
@@ -35,13 +36,15 @@ const configMap: Record<
   },
 };
 
-export const ReservaEstadoBadge = ({ estado, className = "" }: ReservaEstadoBadgeProps) => {
-  const config = configMap[estado] ?? {
-    label: estado,
-    bg: "bg-(--cream)",
-    text: "text-(--muted)",
-    dot: "bg-(--muted)",
-  };
+export const ReservaEstadoBadge = ({ estado, vencida = false, className = "" }: ReservaEstadoBadgeProps) => {
+  const config = vencida
+    ? { label: "Expirada", bg: "bg-(--cream)", text: "text-(--muted)", dot: "bg-(--muted)" }
+    : (configMap[estado] ?? {
+        label: estado,
+        bg: "bg-(--cream)",
+        text: "text-(--muted)",
+        dot: "bg-(--muted)",
+      });
 
   return (
     <span
