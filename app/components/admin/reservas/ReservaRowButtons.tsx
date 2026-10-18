@@ -1,7 +1,7 @@
 "use client";
 
 import { Reserva } from "@/app/types/reservas";
-import { Check, CheckCircle2, CreditCard, Eye, XCircle } from "lucide-react";
+import { Check, Eye, XCircle } from "lucide-react";
 import { useOpenReservaModal } from "./ReservaModal";
 
 const iconButton =
@@ -23,45 +23,20 @@ export const ReservaRowButtons = ({ reserva }: { reserva: Reserva }) => {
         <Eye size={14} aria-hidden="true" />
       </button>
 
-      {/* Registrar pago si está pendiente y no cancelada */}
-      {reserva.estadoPago === "PENDIENTE" && reserva.estado !== "CANCELADA" && (
+      {/* PENDIENTE (esperando pago): solo se puede cancelar. La confirmación la hace el pago aprobado. */}
+      {reserva.estado === "PENDIENTE" && (
         <button
           type="button"
-          onClick={() => open({ kind: "marcar-pagado", reserva })}
-          aria-label={`Registrar pago para reserva #${reserva.id}`}
-          title="Registrar pago recibido (PAGADO)"
-          className={`${iconButton} hover:border-[#009ee3]! hover:text-[#009ee3]!`}
+          onClick={() => open({ kind: "cancelar", reserva })}
+          aria-label={`Cancelar reserva #${reserva.id}`}
+          title="Cancelar reserva"
+          className={`${iconButton} hover:border-(--terracotta)! hover:text-(--terracotta)!`}
         >
-          <CreditCard size={14} aria-hidden="true" />
+          <XCircle size={14} aria-hidden="true" />
         </button>
       )}
 
-      {/* Si está PENDIENTE: puede confirmar o cancelar */}
-      {reserva.estado === "PENDIENTE" && (
-        <>
-          <button
-            type="button"
-            onClick={() => open({ kind: "confirmar", reserva })}
-            aria-label={`Confirmar reserva #${reserva.id}`}
-            title="Confirmar reserva"
-            className={`${iconButton} hover:border-(--olive)! hover:text-(--olive)!`}
-          >
-            <CheckCircle2 size={14} aria-hidden="true" />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => open({ kind: "cancelar", reserva })}
-            aria-label={`Cancelar reserva #${reserva.id}`}
-            title="Cancelar reserva"
-            className={`${iconButton} hover:border-(--terracotta)! hover:text-(--terracotta)!`}
-          >
-            <XCircle size={14} aria-hidden="true" />
-          </button>
-        </>
-      )}
-
-      {/* Si está CONFIRMADA: puede marcar completada o cancelar */}
+      {/* CONFIRMADA: puede marcar completada. Cancelar solo si no está pagada (el reembolso aún no está listo) */}
       {reserva.estado === "CONFIRMADA" && (
         <>
           <button
@@ -74,15 +49,17 @@ export const ReservaRowButtons = ({ reserva }: { reserva: Reserva }) => {
             <Check size={14} aria-hidden="true" />
           </button>
 
-          <button
-            type="button"
-            onClick={() => open({ kind: "cancelar", reserva })}
-            aria-label={`Cancelar reserva #${reserva.id}`}
-            title="Cancelar reserva"
-            className={`${iconButton} hover:border-(--terracotta)! hover:text-(--terracotta)!`}
-          >
-            <XCircle size={14} aria-hidden="true" />
-          </button>
+          {reserva.estadoPago !== "PAGADO" && (
+            <button
+              type="button"
+              onClick={() => open({ kind: "cancelar", reserva })}
+              aria-label={`Cancelar reserva #${reserva.id}`}
+              title="Cancelar reserva"
+              className={`${iconButton} hover:border-(--terracotta)! hover:text-(--terracotta)!`}
+            >
+              <XCircle size={14} aria-hidden="true" />
+            </button>
+          )}
         </>
       )}
     </div>

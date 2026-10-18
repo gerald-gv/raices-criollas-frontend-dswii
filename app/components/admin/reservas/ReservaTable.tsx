@@ -1,9 +1,10 @@
 import { Reserva } from "@/app/types/reservas";
-import { formatPrice } from "@/app/lib/reservas";
 import { ReservaEstadoBadge } from "../../reservas/ReservaEstadoBadge";
 import { PagoEstadoBadge } from "../../reservas/PagoEstadoBadge";
+import { formatPrice } from "@/app/lib/reservas";
 import { ReservaRowButtons } from "./ReservaRowButtons";
-import { Calendar, CreditCard, MapPin, User, Users } from "lucide-react";
+import { Calendar, MapPin, User, Users } from "lucide-react";
+import { estaVencida } from "@/app/lib/reservas-estados";
 
 interface ReservaTableProps {
   reservas: Reserva[];
@@ -53,8 +54,8 @@ export const ReservaTable = ({ reservas }: ReservaTableProps) => {
                 </div>
 
                 <div className="flex flex-col items-end gap-1">
-                  <ReservaEstadoBadge estado={reserva.estado} />
-                  <PagoEstadoBadge estado={reserva.estadoPago} />
+                  <ReservaEstadoBadge estado={reserva.estado} vencida={estaVencida(reserva)} />
+                  <PagoEstadoBadge estadoPago={reserva.estadoPago} />
                 </div>
               </div>
 
@@ -67,22 +68,12 @@ export const ReservaTable = ({ reservas }: ReservaTableProps) => {
 
                 <div className="flex items-center gap-1.5 text-(--ink)">
                   <Calendar size={13} className="text-(--terracotta)" />
-                  <span>
-                    {reserva.fechaInicio.split("T")[0]} ({horaInicioStr})
-                  </span>
+                  <span>{reserva.fechaInicio.split("T")[0]} ({horaInicioStr})</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 text-(--ink)">
                   <Users size={13} className="text-(--terracotta)" />
-                  <span>{reserva.cantidadPersonas} personas</span>
-                </div>
-
-                <div className="flex items-center gap-1.5 text-(--ink)">
-                  <CreditCard size={13} className="text-(--terracotta)" />
-                  <span className="text-(--muted)">Total:</span>
-                  <span className="font-bold text-(--terracotta)">
-                    {formatPrice(reserva.montoTotal, reserva.moneda)}
-                  </span>
+                  <span>{reserva.cantidadPersonas} personas · {formatPrice(reserva.montoTotal, reserva.moneda)}</span>
                 </div>
               </div>
 
@@ -115,14 +106,11 @@ export const ReservaTable = ({ reservas }: ReservaTableProps) => {
               <th scope="col" className="px-3 py-3.5">
                 Pers.
               </th>
-              <th scope="col" className="px-3 py-3.5">
-                Importe
+              <th scope="col" className="px-4 py-3.5">
+                Total
               </th>
-              <th scope="col" className="px-3 py-3.5">
-                Estado
-              </th>
-              <th scope="col" className="px-3 py-3.5">
-                Pago
+              <th scope="col" className="px-4 py-3.5">
+                Estado / Pago
               </th>
               <th scope="col" className="px-5 py-3.5 text-right">
                 Acciones
@@ -152,10 +140,7 @@ export const ReservaTable = ({ reservas }: ReservaTableProps) => {
                   </td>
 
                   <td className="px-4 py-3.5">
-                    <p
-                      className="font-mono text-[12px] font-bold text-(--ink) max-w-36 truncate"
-                      title={String(reserva.clienteId)}
-                    >
+                    <p className="font-mono text-[12px] font-bold text-(--ink) max-w-36 truncate" title={String(reserva.clienteId)}>
                       {reserva.clienteId}
                     </p>
                   </td>
@@ -182,16 +167,15 @@ export const ReservaTable = ({ reservas }: ReservaTableProps) => {
                     {reserva.cantidadPersonas}
                   </td>
 
-                  <td className="px-3 py-3.5 text-[13px] font-bold text-(--terracotta)">
+                  <td className="px-4 py-3.5 text-[13px] font-bold text-(--ink)">
                     {formatPrice(reserva.montoTotal, reserva.moneda)}
                   </td>
 
-                  <td className="px-3 py-3.5">
-                    <ReservaEstadoBadge estado={reserva.estado} />
-                  </td>
-
-                  <td className="px-3 py-3.5">
-                    <PagoEstadoBadge estado={reserva.estadoPago} />
+                  <td className="px-4 py-3.5">
+                    <div className="flex flex-col items-start gap-1">
+                      <ReservaEstadoBadge estado={reserva.estado} vencida={estaVencida(reserva)} />
+                      <PagoEstadoBadge estadoPago={reserva.estadoPago} />
+                    </div>
                   </td>
 
                   <td className="px-5 py-3.5">
