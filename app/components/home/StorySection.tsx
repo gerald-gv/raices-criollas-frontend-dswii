@@ -55,8 +55,27 @@ export const StorySection = () => {
                 </blockquote>
             </div>
 
-            <div className="absolute -left-20 top-7.5 font-serif text-[360px] leading-none text-[rgba(244,190,34,0.18)]" aria-hidden="true">
-                ✺
+            <div className="pointer-events-none absolute -left-16 top-16 w-85 -rotate-12 text-[#f4be22] opacity-[0.18] md:w-105" aria-hidden="true" >
+                
+                <svg viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-auto w-full">
+                
+                    {/* Vapor */}
+                    <path  d="M91 67 C75 49 104 43 91 23 M120 64 C104 45 135 37 119 16 M148 67 C133 50 160 43 148 27" stroke="currentColor" strokeWidth="7" strokeLinecap="round"/>
+
+                    {/* Tapa */}
+                    <path d="M78 81 Q120 65 162 81" stroke="currentColor" strokeWidth="7" strokeLinecap="round" />
+
+                    <path d="M105 72 Q120 59 135 72" stroke="currentColor" strokeWidth="7" strokeLinecap="round" />
+
+                    {/* Cuerpo de la olla */}
+                    <path d="M67 86 L173 86 L164 153 Q159 181 120 184 Q81 181 76 153 Z" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="7" strokeLinejoin="round" />
+
+                    {/* Asas */}
+                    <path d="M67 103 L48 103 Q36 103 38 119 Q40 133 72 131 M173 103 L192 103 Q204 103 202 119 Q200 133 168 131" stroke="currentColor" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
+
+                    {/* Base */}
+                    <path d="M97 194 Q120 201 143 194" stroke="currentColor" strokeWidth="7" strokeLinecap="round" />
+                </svg>
             </div>
             
         </section>
